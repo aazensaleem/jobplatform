@@ -1,0 +1,72 @@
+<h1><%= @job.title %></h1>
+
+<% if current_user&.candidate? %>
+  <% if @existing_application %>
+    <p>You applied: <%= @existing_application.status.humanize %>. <%= link_to "My applications", my_applications_path %></p>
+  <% elsif @job.accepting_applications? %>
+    <p><%= link_to "Apply", new_job_application_path(@job) %></p>
+  <% else %>
+    <p>This job is not accepting applications.</p>
+  <% end %>
+  <% if @saved_job %>
+    <%= button_to "Unsave job", my_saved_job_path(@saved_job), method: :delete %>
+  <% else %>
+    <%= button_to "Save job", job_saved_jobs_path(@job) %>
+  <% end %>
+<% elsif !user_signed_in? %>
+  <p><%= link_to "Sign in to apply or save jobs", new_user_session_path %></p>
+<% end %>
+
+<% if can?(:review_applicants, @job) %>
+  <p><%= link_to "View applicants", employer_job_applications_path(@job) %></p>
+<% end %>
+
+<dl>
+  <dt>Company</dt>
+  <dd><%= link_to @job.company.name, @job.company %></dd>
+
+  <dt>Description</dt>
+  <dd><%= simple_format(@job.description) %></dd>
+
+  <dt>Location</dt>
+  <dd><%= @job.location.presence || "Not specified" %></dd>
+
+  <dt>Job type</dt>
+  <dd><%= @job.job_type.presence || "Not specified" %></dd>
+
+  <dt>Experience level</dt>
+  <dd><%= @job.experience_level.presence || "Not specified" %></dd>
+
+  <dt>Salary</dt>
+  <dd>
+    <% if @job.salary_min || @job.salary_max %>
+      <%= number_to_currency(@job.salary_min) if @job.salary_min %>
+      <%= "–" if @job.salary_min && @job.salary_max %>
+      <%= number_to_currency(@job.salary_max) if @job.salary_max %>
+    <% else %>
+      Not specified
+    <% end %>
+  </dd>
+
+  <dt>Deadline</dt>
+  <dd><%= @job.deadline&.to_fs(:long) || "Not specified" %></dd>
+
+  <dt>Status</dt>
+  <dd><%= @job.status.humanize %></dd>
+</dl>
+
+<p>
+  <% if can?(:update, @job) %>
+    <%= link_to "Edit", edit_job_path(@job) %> |
+  <% end %>
+  <%= link_to "Back to jobs", jobs_path %>
+</p>
+
+<% if can?(:destroy, @job) %>
+  <%= button_to "Delete job", @job, method: :delete,
+                data: { turbo_confirm: "Delete this job?" } %>
+<% end %>
+
+<% if can?(:close, @job) && @job.status != "closed" %>
+  <%= button_to "Close job", close_job_path(@job), method: :patch %>
+<% end %>

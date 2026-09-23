@@ -1,0 +1,42 @@
+<h1>Companies</h1>
+
+<p>
+  <% if can?(:create, Company) %>
+    <%= link_to "Add a company", new_company_path %> |
+  <% end %>
+  <%= link_to "View jobs", jobs_path %>
+</p>
+
+<% if @companies.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Employer</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @companies.each do |company| %>
+        <tr>
+          <td><%= company.name %></td>
+          <td><%= company.location %></td>
+          <td><%= company.user.email %></td>
+          <td>
+            <%= link_to "View", company %>
+            <% if can?(:update, company) %>
+              <%= link_to "Edit", edit_company_path(company) %>
+            <% end %>
+            <% if can?(:destroy, company) %>
+              <%= button_to "Delete", company, method: :delete,
+                            data: { turbo_confirm: "Delete this company and its jobs?" } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No companies have been created yet.</p>
+<% end %>

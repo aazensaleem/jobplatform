@@ -1,0 +1,44 @@
+<h1>Jobs</h1>
+
+<p>
+  <% if can?(:create, Job.new) %>
+    <%= link_to "Post a job", new_job_path %> |
+  <% end %>
+  <%= link_to "View companies", companies_path %>
+</p>
+
+<% if @jobs.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Company</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @jobs.each do |job| %>
+        <tr>
+          <td><%= job.title %></td>
+          <td><%= link_to job.company.name, job.company %></td>
+          <td><%= job.location %></td>
+          <td><%= job.status.humanize %></td>
+          <td>
+            <%= link_to "View", job %>
+            <% if can?(:update, job) %>
+              <%= link_to "Edit", edit_job_path(job) %>
+            <% end %>
+            <% if can?(:destroy, job) %>
+              <%= button_to "Delete", job, method: :delete,
+                            data: { turbo_confirm: "Delete this job?" } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No jobs have been posted yet.</p>
+<% end %>

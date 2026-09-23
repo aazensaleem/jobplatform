@@ -1,0 +1,38 @@
+<%= form_with model: company do |form| %>
+  <% if company.errors.any? %>
+    <div>
+      <h2><%= pluralize(company.errors.count, "error") %> prevented this company from being saved:</h2>
+      <ul>
+        <% company.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p>
+    <%= form.label :name %><br>
+    <%= form.text_field :name, required: true %>
+  </p>
+
+  <p>
+    <%= form.label :description %><br>
+    <%= form.text_area :description, rows: 8 %>
+  </p>
+
+  <p>
+    <%= form.label :location %><br>
+    <%= form.text_field :location %>
+  </p>
+
+  <% if current_user.admin? %>
+    <p>
+      <%= form.label :user_id, "Employer" %><br>
+      <%= form.collection_select :user_id, @employers,
+                                 :id, :email, { prompt: "Select an employer" },
+                                 required: true %>
+    </p>
+  <% end %>
+
+  <p><%= form.submit %></p>
+<% end %>

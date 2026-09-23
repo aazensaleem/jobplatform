@@ -1,0 +1,20 @@
+<h1>My applications</h1>
+
+<% if @applications.any? %>
+  <table>
+    <thead><tr><th>Job</th><th>Company</th><th>Status</th><th>Applied at</th></tr></thead>
+    <tbody>
+      <% @applications.each do |application| %>
+        <tr>
+          <td><%= link_to application.job.title, application.job %></td>
+          <td><%= application.job.company.name %></td>
+          <td><%= application.status.humanize %></td>
+          <td><%= application.created_at.to_fs(:long) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>You have not applied for any jobs yet.</p>
+<% end %>
+<p><%= link_to "Browse jobs", jobs_path %></p>

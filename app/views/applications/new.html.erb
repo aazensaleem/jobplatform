@@ -1,0 +1,25 @@
+<h1>Apply for <%= @job.title %></h1>
+
+<% if @application.errors.any? %>
+  <ul>
+    <% @application.errors.full_messages.each do |message| %>
+      <li><%= message %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if current_user.applications.exists?(job: @job) %>
+  <p>You have already applied for this job. <%= link_to "View my applications", my_applications_path %></p>
+<% elsif @job.accepting_applications? %>
+  <%= form_with model: [@job, @application] do |form| %>
+    <p>
+      <%= form.label :cover_letter, "Cover letter (optional)" %><br>
+      <%= form.text_area :cover_letter, rows: 8 %>
+    </p>
+    <%= form.submit "Submit application" %>
+  <% end %>
+<% else %>
+  <p>This job is not accepting applications.</p>
+<% end %>
+
+<p><%= link_to "Back to job", @job %></p>

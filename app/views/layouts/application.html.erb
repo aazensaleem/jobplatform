@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Jobplatform" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Jobplatform">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  </head>
+
+  <body>
+    <nav>
+      <%= link_to "Jobs", jobs_path %> |
+      <%= link_to "Companies", companies_path %> |
+
+      <% if user_signed_in? %>
+        <% if current_user.candidate? %>
+          <%= link_to "My applications", my_applications_path %> |
+          <%= link_to "My saved jobs", my_saved_jobs_path %> |
+        <% end %>
+        <% if current_user.employer? %>
+          <%= link_to "My job listings", employer_jobs_path %> |
+        <% end %>
+        Signed in as <%= current_user.email %> (<%= current_user.role %>) |
+        <%= link_to "Account", edit_user_registration_path %> |
+        <%= button_to "Sign out", destroy_user_session_path, method: :delete,
+                      form: { style: "display: inline" } %>
+      <% else %>
+        <%= link_to "Sign up", new_user_registration_path %> |
+        <%= link_to "Sign in", new_user_session_path %>
+      <% end %>
+    </nav>
+
+    <p><%= notice %></p>
+    <p><%= alert %></p>
+
+    <%= yield %>
+  </body>
+</html>

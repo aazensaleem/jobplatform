@@ -1,0 +1,40 @@
+<h1><%= @company.name %></h1>
+
+<dl>
+  <dt>Employer</dt>
+  <dd><%= @company.user.email %></dd>
+
+  <dt>Description</dt>
+  <dd><%= simple_format(@company.description.presence || "Not specified") %></dd>
+
+  <dt>Location</dt>
+  <dd><%= @company.location.presence || "Not specified" %></dd>
+</dl>
+
+<p>
+  <% if can?(:update, @company) %>
+    <%= link_to "Edit company", edit_company_path(@company) %> |
+  <% end %>
+  <%= link_to "Back to companies", companies_path %>
+</p>
+
+<h2>Jobs</h2>
+
+<% if can?(:create, Job.new(company: @company)) %>
+  <p><%= link_to "Post a job", new_job_path %></p>
+<% end %>
+
+<% if @jobs.any? %>
+  <ul>
+    <% @jobs.each do |job| %>
+      <li><%= link_to job.title, job %> — <%= job.status.humanize %></li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>This company has no jobs yet.</p>
+<% end %>
+
+<% if can?(:destroy, @company) %>
+  <%= button_to "Delete company", @company, method: :delete,
+                data: { turbo_confirm: "Delete this company and its jobs?" } %>
+<% end %>

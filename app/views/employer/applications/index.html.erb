@@ -1,0 +1,29 @@
+<h1>Applicants for <%= @job.title %></h1>
+
+<% if @application&.errors&.any? %>
+  <ul>
+    <% @application.errors.full_messages.each do |message| %>
+      <li><%= message %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if @applications.any? %>
+  <% @applications.each do |application| %>
+    <article>
+      <h2><%= application.user.email %></h2>
+      <p>Applied at: <%= application.created_at.to_fs(:long) %></p>
+      <p>Status: <%= application.status.humanize %></p>
+      <h3>Cover letter</h3>
+      <%= simple_format(application.cover_letter.presence || "No cover letter provided.") %>
+      <%= form_with model: application, url: employer_application_path(application) do |form| %>
+        <%= form.label :status, for: "application_#{application.id}_status" %>
+        <%= form.select :status, Application::STATUSES.map { |status| [status.humanize, status] }, {}, id: "application_#{application.id}_status" %>
+        <%= form.submit "Update status" %>
+      <% end %>
+    </article>
+  <% end %>
+<% else %>
+  <p>No applications for this job yet.</p>
+<% end %>
+<p><%= link_to "Back to job", @job %></p>

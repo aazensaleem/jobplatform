@@ -1,0 +1,20 @@
+<h1>My saved jobs</h1>
+
+<% if @saved_jobs.any? %>
+  <table>
+    <thead><tr><th>Job</th><th>Company</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% @saved_jobs.each do |saved_job| %>
+        <tr>
+          <td><%= link_to saved_job.job.title, saved_job.job %></td>
+          <td><%= saved_job.job.company.name %></td>
+          <td><%= saved_job.job.status.humanize %></td>
+          <td><%= button_to "Unsave", my_saved_job_path(saved_job), method: :delete %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>You have not saved any jobs yet.</p>
+<% end %>
+<p><%= link_to "Browse jobs", jobs_path %></p>

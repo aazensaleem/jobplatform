@@ -1,0 +1,65 @@
+<%= form_with model: job do |form| %>
+  <% if job.errors.any? %>
+    <div>
+      <h2><%= pluralize(job.errors.count, "error") %> prevented this job from being saved:</h2>
+      <ul>
+        <% job.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p>
+    <%= form.label :title %><br>
+    <%= form.text_field :title, required: true %>
+  </p>
+
+  <p>
+    <%= form.label :description %><br>
+    <%= form.text_area :description, rows: 8, required: true %>
+  </p>
+
+  <p>
+    <%= form.label :company_id, "Company" %><br>
+    <%= form.collection_select :company_id, @companies, :id, :name,
+                               { prompt: "Select a company" }, required: true %>
+  </p>
+
+  <p>
+    <%= form.label :location %><br>
+    <%= form.text_field :location %>
+  </p>
+
+  <p>
+    <%= form.label :job_type %><br>
+    <%= form.text_field :job_type %>
+  </p>
+
+  <p>
+    <%= form.label :experience_level %><br>
+    <%= form.text_field :experience_level %>
+  </p>
+
+  <p>
+    <%= form.label :salary_min, "Minimum salary" %><br>
+    <%= form.number_field :salary_min, min: 0, step: 0.01 %>
+  </p>
+
+  <p>
+    <%= form.label :salary_max, "Maximum salary" %><br>
+    <%= form.number_field :salary_max, min: 0, step: 0.01 %>
+  </p>
+
+  <p>
+    <%= form.label :deadline %><br>
+    <%= form.datetime_local_field :deadline %>
+  </p>
+
+  <p>
+    <%= form.label :status %><br>
+    <%= form.select :status, Job::STATUSES.map { |status| [status.humanize, status] } %>
+  </p>
+
+  <p><%= form.submit %></p>
+<% end %>

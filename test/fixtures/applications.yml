@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  job: one
+  status: pending
+  cover_letter: MyText
+
+two:
+  user: two
+  job: two
+  status: shortlisted
+  cover_letter: MyText

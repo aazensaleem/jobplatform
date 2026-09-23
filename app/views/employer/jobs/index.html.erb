@@ -1,0 +1,41 @@
+<h1>My job listings</h1>
+
+<% if @companies.empty? %>
+  <p>Create your company before posting a job.</p>
+  <p><%= link_to "Create my company", new_company_path %></p>
+<% else %>
+  <% @companies.each do |company| %>
+    <p>
+      <%= link_to company.name, company %> |
+      <%= link_to "Edit company", edit_company_path(company) %>
+    </p>
+  <% end %>
+  <p><%= link_to "Post a job", new_job_path %></p>
+
+  <% if @jobs.any? %>
+    <table>
+      <thead>
+        <tr><th>Title</th><th>Company</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <% @jobs.each do |job| %>
+          <tr>
+            <td><%= link_to job.title, job %></td>
+            <td><%= job.company.name %></td>
+            <td><%= job.status.humanize %></td>
+            <td>
+              <%= link_to "Edit", edit_job_path(job) %>
+              <%= link_to "View applicants", employer_job_applications_path(job) %>
+              <% unless job.status == "closed" %>
+                <%= button_to "Close job", close_job_path(job), method: :patch %>
+              <% end %>
+              <%= button_to "Delete job", job, method: :delete %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>You have not posted any jobs yet.</p>
+  <% end %>
+<% end %>
