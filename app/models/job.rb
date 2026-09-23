@@ -13,4 +13,19 @@ class Job < ApplicationRecord
   def accepting_applications?
     status == "active" && (deadline.nil? || deadline > Time.current)
   end
+
+  def search_document
+    {
+      id: id,
+      title: title,
+      description: description,
+      company_name: company.name,
+      location: location,
+      job_type: job_type,
+      experience_level: experience_level,
+      # Skills are reserved in the search mapping; there is no MySQL skills field yet.
+      skills: [],
+      status: status
+    }
+  end
 end

@@ -7,6 +7,37 @@
   <%= link_to "View companies", companies_path %>
 </p>
 
+<%= form_with url: jobs_path, method: :get do |form| %>
+  <fieldset>
+    <legend>Filter jobs</legend>
+    <p>Text filters match the full field value. Combine filters to narrow the results.</p>
+    <p>
+      <%= form.label :location %>
+      <%= form.text_field :location, value: @filters["location"] %>
+    </p>
+    <p>
+      <%= form.label :job_type, "Job type" %>
+      <%= form.text_field :job_type, value: @filters["job_type"] %>
+    </p>
+    <p>
+      <%= form.label :experience_level, "Experience level" %>
+      <%= form.text_field :experience_level, value: @filters["experience_level"] %>
+    </p>
+    <p>
+      <%= form.label :status %>
+      <%= form.select :status, Job::STATUSES.map { |status| [status.humanize, status] },
+                      { include_blank: "All statuses", selected: @filters["status"] } %>
+    </p>
+    <p>
+      <%= form.label :company_id, "Company" %>
+      <%= form.collection_select :company_id, @filter_companies, :id, :name,
+                                 { include_blank: "All companies", selected: @filters["company_id"] } %>
+    </p>
+    <%= form.submit "Filter jobs", name: nil %>
+    <%= link_to "Clear filters", jobs_path %>
+  </fieldset>
+<% end %>
+
 <% if @jobs.any? %>
   <table>
     <thead>
@@ -14,6 +45,8 @@
         <th>Title</th>
         <th>Company</th>
         <th>Location</th>
+        <th>Job type</th>
+        <th>Experience level</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
@@ -24,6 +57,8 @@
           <td><%= job.title %></td>
           <td><%= link_to job.company.name, job.company %></td>
           <td><%= job.location %></td>
+          <td><%= job.job_type %></td>
+          <td><%= job.experience_level %></td>
           <td><%= job.status.humanize %></td>
           <td>
             <%= link_to "View", job %>
@@ -40,5 +75,5 @@
     </tbody>
   </table>
 <% else %>
-  <p>No jobs have been posted yet.</p>
+  <p><%= @filters.any? ? "No jobs match your filters." : "No jobs have been posted yet." %></p>
 <% end %>

@@ -4,7 +4,18 @@ class JobsController < ApplicationController
 
   def index
     authorize! :read, Job
+    @filters = params.permit(:location, :job_type, :experience_level, :status, :company_id)
+                     .to_h.transform_values { |value| value.to_s.strip }.reject { |_, value| value.blank? }
     @jobs = Job.includes(:company).order(created_at: :desc)
+    @jobs = @jobs.where(@filters.except("company_id"))
+    if @filters["company_id"].present?
+      @jobs = if @filters["company_id"].match?(/\A[1-9]\d*\z/)
+        @jobs.where(company_id: @filters["company_id"])
+      else
+        @jobs.none
+      end
+    end
+    @filter_companies = Company.order(:name)
   end
 
   def show
