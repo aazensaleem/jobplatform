@@ -4,10 +4,17 @@ class JobsController < ApplicationController
 
   def index
     authorize! :read, Job
-    @filters = params.permit(:location, :job_type, :experience_level, :status, :company_id)
+    @filters = params.permit(:q, :location, :job_type, :experience_level, :status, :company_id)
                      .to_h.transform_values { |value| value.to_s.strip }.reject { |_, value| value.blank? }
-    @jobs = Job.includes(:company).order(created_at: :desc)
-    @jobs = @jobs.where(@filters.except("company_id"))
+    @jobs = if @filters["q"].present?
+      ids = JobSearchService.new(query: @filters["q"], location: @filters["location"],
+                                 job_type: @filters["job_type"],
+                                 experience_level: @filters["experience_level"]).job_ids
+      Job.includes(:company).where(id: ids, status: "active").in_order_of(:id, ids)
+    else
+      Job.includes(:company).order(created_at: :desc).where(@filters.except("company_id"))
+    end
+    @jobs = @jobs.none if @filters["q"].present? && @filters["status"].present? && @filters["status"] != "active"
     if @filters["company_id"].present?
       @jobs = if @filters["company_id"].match?(/\A[1-9]\d*\z/)
         @jobs.where(company_id: @filters["company_id"])
@@ -15,6 +22,13 @@ class JobsController < ApplicationController
         @jobs.none
       end
     end
+    @filter_companies = Company.order(:name)
+  rescue OpenSearch::Transport::Transport::Error, Faraday::Error => error
+    raise unless @filters&.key?("q")
+
+    Rails.logger.error("OpenSearch job search failed: #{error.class}: #{error.message}")
+    @search_unavailable = true
+    @jobs = Job.none
     @filter_companies = Company.order(:name)
   end
 

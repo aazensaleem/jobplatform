@@ -10,6 +10,9 @@ class Job < ApplicationRecord
   validates :salary_min, :salary_max,
             numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
+  after_commit :sync_search_index, on: %i[create update]
+  after_commit :remove_from_search_index, on: :destroy
+
   def accepting_applications?
     status == "active" && (deadline.nil? || deadline > Time.current)
   end
@@ -27,5 +30,15 @@ class Job < ApplicationRecord
       skills: [],
       status: status
     }
+  end
+
+  private
+
+  def sync_search_index
+    JobSearchIndex.sync(self) if Rails.configuration.x.opensearch_sync
+  end
+
+  def remove_from_search_index
+    JobSearchIndex.remove(id) if Rails.configuration.x.opensearch_sync
   end
 end

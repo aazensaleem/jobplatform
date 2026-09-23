@@ -9,7 +9,8 @@ roles and save listings.
 - Role-based permissions with CanCanCan
 - Company and job management
 - Filter jobs by location, job type, experience level, status, and company
-- OpenSearch connection and console indexing/search check
+- Search active jobs by keyword through OpenSearch, with location, job type, and experience filters
+- Automatic OpenSearch synchronization for job changes and company renames
 - Employer dashboard and applicant status updates
 - Candidate applications and saved jobs
 
@@ -56,18 +57,41 @@ bin/rails zeitwerk:check
 bin/rubocop
 ```
 
-## OpenSearch console check
+## OpenSearch search and reindex
 
-OpenSearch is configured for console use; the website still uses MySQL filtering.
-Start a local OpenSearch server before running the check. With the development
-installation on this Mac:
+The Jobs page uses OpenSearch when Keywords is filled in. It shows active jobs
+only and can combine keywords with location, job type, and experience level.
+Without keywords, the existing MySQL filters continue to work for all statuses.
+Before starting OpenSearch, check whether it is already running:
+
+```bash
+curl http://127.0.0.1:9200
+```
+
+If this prints OpenSearch version information, use the running server and skip
+the startup command. Starting a second copy against the same data directory
+fails with a `failed to obtain node locks` error. If the check cannot connect,
+start the development installation on this Mac:
 
 ```bash
 OPENSEARCH_JAVA_OPTS="-Xms256m -Xmx256m" opensearch \
   -Ediscovery.type=single-node -Enetwork.host=127.0.0.1
 ```
 
-In another terminal, after creating at least one job in the app:
+In another terminal, populate the search index from existing MySQL jobs:
+
+```bash
+bin/rails jobs:reindex
+```
+
+Run this after first enabling search or if an OpenSearch outage leaves the index
+behind MySQL. New, edited, and deleted jobs sync automatically after commit;
+renaming a company updates its jobs' indexed company name. OpenSearch makes
+new writes visible shortly after indexing. If it is offline, MySQL changes
+still save and the app logs the sync failure; keyword search shows an unavailable
+message until OpenSearch is running and the index is rebuilt.
+
+To run the Phase 11 console smoke check, after creating at least one job:
 
 ```bash
 bin/rails runner script/opensearch_check.rb
@@ -82,5 +106,5 @@ Rails environments. Restart Rails after changing these settings. The local
 single-node configuration is for development; use a secured server for deployment.
 
 The client is available as `OPENSEARCH_CLIENT` in `bin/rails console`, and
-`Job#search_document` builds the searchable fields. Job changes are not yet
-automatically synchronized to OpenSearch.
+`Job#search_document` builds the searchable fields. Search currently returns
+up to 1,000 matches; pagination comes in a later phase.

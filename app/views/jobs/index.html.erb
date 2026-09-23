@@ -10,7 +10,11 @@
 <%= form_with url: jobs_path, method: :get do |form| %>
   <fieldset>
     <legend>Filter jobs</legend>
-    <p>Text filters match the full field value. Combine filters to narrow the results.</p>
+    <p>Without keywords, filters match the full field value. Keyword searches show active jobs only.</p>
+    <p>
+      <%= form.label :q, "Keywords" %>
+      <%= form.search_field :q, value: @filters["q"] %>
+    </p>
     <p>
       <%= form.label :location %>
       <%= form.text_field :location, value: @filters["location"] %>
@@ -38,7 +42,9 @@
   </fieldset>
 <% end %>
 
-<% if @jobs.any? %>
+<% if @search_unavailable %>
+  <p>Keyword search is unavailable. Start OpenSearch and run <code>bin/rails jobs:reindex</code>, then try again.</p>
+<% elsif @jobs.any? %>
   <table>
     <thead>
       <tr>

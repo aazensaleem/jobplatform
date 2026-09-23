@@ -9,3 +9,6 @@ OPENSEARCH_CLIENT = OpenSearch::Client.new(
 Rails.application.config.x.opensearch_index = ENV.fetch(
   "OPENSEARCH_INDEX", "jobplatform_jobs_#{Rails.env}"
 )
+
+# Tests opt into callback synchronization when verifying it with a stub client.
+Rails.application.config.x.opensearch_sync = !Rails.env.test?
