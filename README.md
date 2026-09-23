@@ -11,6 +11,7 @@ roles and save listings.
 - Filter jobs by location, job type, experience level, status, and company
 - Search active jobs by keyword through OpenSearch, with location, job type, and experience filters
 - Automatic OpenSearch synchronization for job changes and company renames
+- Redis and Sidekiq background job processing, with a console check job
 - Employer dashboard and applicant status updates
 - Candidate applications and saved jobs
 
@@ -19,6 +20,7 @@ roles and save listings.
 - Ruby 4.0.7
 - Rails 8.1.3.1 (installed through Bundler)
 - MySQL 8.2
+- Redis 8.10.1 for Sidekiq jobs
 
 ## Setup
 
@@ -108,3 +110,40 @@ single-node configuration is for development; use a secured server for deploymen
 The client is available as `OPENSEARCH_CLIENT` in `bin/rails console`, and
 `Job#search_document` builds the searchable fields. Search currently returns
 up to 1,000 matches; pagination comes in a later phase.
+
+## Redis and Sidekiq
+
+Check whether Redis is already running:
+
+```bash
+redis-cli ping
+```
+
+If it prints `PONG`, keep using that server. Otherwise, start the installed
+local Redis in a separate terminal:
+
+```bash
+redis-server --bind 127.0.0.1
+```
+
+Start a Sidekiq worker in another terminal, alongside the Rails server:
+
+```bash
+bundle exec sidekiq -q default
+```
+
+Rails uses Sidekiq for Active Job in development and production. Tests use the
+Rails test adapter, so the automated suite does not need Redis. Sidekiq uses
+`redis://localhost:6379/0` by default; set the same `REDIS_URL` for the Rails
+server and worker if your Redis address differs.
+
+To verify processing, run this from the project directory while Redis and the
+worker are running:
+
+```bash
+bin/rails runner 'SidekiqCheckJob.perform_later("manual-check")'
+```
+
+The worker terminal should print `Sidekiq check job completed: manual-check`.
+This check job only writes a log line. OpenSearch indexing still runs
+synchronously; moving it to Sidekiq is the next roadmap phase.

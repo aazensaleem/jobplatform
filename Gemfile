@@ -8,8 +8,10 @@ gem "json", "~> 2.21.2"
 # Authentication and role-based authorization
 gem "devise", "~> 5.0.4"
 gem "cancancan", "~> 3.6.1"
-# OpenSearch client for console indexing and search
+# OpenSearch client for keyword search and indexing
 gem "opensearch-ruby", "~> 3.4", require: "opensearch"
+# Background job processing through Redis
+gem "sidekiq", "~> 8.0"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use mysql as the database for Active Record

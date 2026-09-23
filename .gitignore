@@ -19,6 +19,11 @@
 /CODEX_CONTEXT.md
 /error.md
 
+# Local Redis persistence can contain queued job arguments
+/dump.rdb
+/appendonly.aof
+/appendonlydir/
+
 !/log/.keep
 !/storage/.keep
 !/tmp/.keep
