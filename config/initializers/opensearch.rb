@@ -10,5 +10,5 @@ Rails.application.config.x.opensearch_index = ENV.fetch(
   "OPENSEARCH_INDEX", "jobplatform_jobs_#{Rails.env}"
 )
 
-# Tests opt into callback synchronization when verifying it with a stub client.
+# Tests opt into callback enqueueing when verifying it with the test job adapter.
 Rails.application.config.x.opensearch_sync = !Rails.env.test?

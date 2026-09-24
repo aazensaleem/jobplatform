@@ -11,6 +11,8 @@ class Company < ApplicationRecord
   def sync_jobs_for_search
     return unless Rails.configuration.x.opensearch_sync
 
-    jobs.find_each { |job| JobSearchIndex.sync(job) }
+    jobs.find_each { |job| IndexJobInOpenSearchJob.perform_later(job.id) }
+  rescue StandardError => error
+    Rails.logger.error("Could not enqueue OpenSearch indexing for company #{id}: #{error.class}: #{error.message}")
   end
 end

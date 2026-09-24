@@ -103,6 +103,33 @@ class AuthenticationAuthorizationTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
+  test "the companies page lists only the signed-in employer's company" do
+    sign_in users(:two)
+
+    get companies_path
+    assert_response :success
+    assert_select "a[href=?]", company_path(companies(:one)), count: 1
+    assert_select "a[href=?]", company_path(companies(:two)), count: 0
+  end
+
+  test "an employer without a company sees an empty companies page" do
+    employer = User.create!(email: "no-company@example.com", password: "password123", role: "employer")
+    sign_in employer
+
+    get companies_path
+    assert_response :success
+    assert_select "p", text: "You have not created a company yet."
+    assert_select "a[href=?]", company_path(companies(:one)), count: 0
+  end
+
+  test "the public companies page still lists all companies" do
+    get companies_path
+
+    assert_response :success
+    assert_select "a[href=?]", company_path(companies(:one)), count: 1
+    assert_select "a[href=?]", company_path(companies(:two)), count: 1
+  end
+
   test "an employer cannot move their job to another employer company" do
     sign_in users(:two)
     job = jobs(:one)

@@ -13,6 +13,8 @@ class JobSearchService
     filters << { term: { "location.keyword" => @location } } if @location.present?
     filters << { term: { job_type: @job_type } } if @job_type.present?
     filters << { term: { experience_level: @experience_level } } if @experience_level.present?
+    fields = %w[title^3 description company_name location skills experience_level]
+    terms = @query.split.map { |term| { multi_match: { query: term, fields: fields } } }
 
     response = OPENSEARCH_CLIENT.search(
       index: Rails.configuration.x.opensearch_index,
@@ -21,7 +23,7 @@ class JobSearchService
         _source: false,
         query: {
           bool: {
-            must: { multi_match: { query: @query, fields: %w[title^3 description company_name location skills] } },
+            must: terms,
             filter: filters
           }
         }

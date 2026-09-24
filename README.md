@@ -62,7 +62,9 @@ bin/rubocop
 ## OpenSearch search and reindex
 
 The Jobs page uses OpenSearch when Keywords is filled in. It shows active jobs
-only and can combine keywords with location, job type, and experience level.
+only. Every keyword must match a searchable field, including title, description,
+company name, location, skills, or experience level. Separate location, job
+type, and experience level fields apply exact filters.
 Without keywords, the existing MySQL filters continue to work for all statuses.
 Before starting OpenSearch, check whether it is already running:
 
@@ -86,12 +88,14 @@ In another terminal, populate the search index from existing MySQL jobs:
 bin/rails jobs:reindex
 ```
 
-Run this after first enabling search or if an OpenSearch outage leaves the index
-behind MySQL. New, edited, and deleted jobs sync automatically after commit;
-renaming a company updates its jobs' indexed company name. OpenSearch makes
-new writes visible shortly after indexing. If it is offline, MySQL changes
-still save and the app logs the sync failure; keyword search shows an unavailable
-message until OpenSearch is running and the index is rebuilt.
+Run this after first enabling search or if a queue or OpenSearch outage leaves
+the index behind MySQL. New, edited, and deleted jobs enqueue indexing work after
+commit; renaming a company enqueues its jobs too. Keep Redis and a Sidekiq worker
+running to process these changes. Search results update after the worker finishes
+and OpenSearch refreshes the documents. OpenSearch failures are retried by
+Sidekiq; if Redis is unavailable, MySQL changes still save and the failed
+enqueue is logged. Run `bin/rails jobs:reindex` after restoring a prolonged
+outage to reconcile the full index.
 
 To run the Phase 11 console smoke check, after creating at least one job:
 
@@ -145,5 +149,7 @@ bin/rails runner 'SidekiqCheckJob.perform_later("manual-check")'
 ```
 
 The worker terminal should print `Sidekiq check job completed: manual-check`.
-This check job only writes a log line. OpenSearch indexing still runs
-synchronously; moving it to Sidekiq is the next roadmap phase.
+This check job only writes a log line. Job creates, edits, deletes, and company
+renames also enqueue work on the default queue. A queued index job reads the
+current MySQL record when it runs, and a queued delete job removes the document
+by ID.

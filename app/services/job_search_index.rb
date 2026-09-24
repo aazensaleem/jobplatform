@@ -22,18 +22,6 @@ class JobSearchIndex
       OPENSEARCH_CLIENT.indices.refresh(index: index_name)
     end
 
-    def sync(job)
-      index(job)
-    rescue StandardError => error
-      Rails.logger.error("OpenSearch job sync failed for job #{job.id}: #{error.class}: #{error.message}")
-    end
-
-    def remove(job_id)
-      delete(job_id)
-    rescue StandardError => error
-      Rails.logger.error("OpenSearch job deletion failed for job #{job_id}: #{error.class}: #{error.message}")
-    end
-
     private
 
     def ensure_index!

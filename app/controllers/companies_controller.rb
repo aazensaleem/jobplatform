@@ -4,7 +4,8 @@ class CompaniesController < ApplicationController
 
   def index
     authorize! :read, Company
-    @companies = Company.includes(:user).order(:name)
+    companies = current_user&.employer? ? Company.where(user: current_user) : Company.all
+    @companies = companies.includes(:user).order(:name)
   end
 
   def show

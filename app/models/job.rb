@@ -35,10 +35,14 @@ class Job < ApplicationRecord
   private
 
   def sync_search_index
-    JobSearchIndex.sync(self) if Rails.configuration.x.opensearch_sync
+    IndexJobInOpenSearchJob.perform_later(id) if Rails.configuration.x.opensearch_sync
+  rescue StandardError => error
+    Rails.logger.error("Could not enqueue OpenSearch indexing for job #{id}: #{error.class}: #{error.message}")
   end
 
   def remove_from_search_index
-    JobSearchIndex.remove(id) if Rails.configuration.x.opensearch_sync
+    DeleteJobFromOpenSearchJob.perform_later(id) if Rails.configuration.x.opensearch_sync
+  rescue StandardError => error
+    Rails.logger.error("Could not enqueue OpenSearch deletion for job #{id}: #{error.class}: #{error.message}")
   end
 end

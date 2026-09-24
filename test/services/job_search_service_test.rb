@@ -1,7 +1,7 @@
 require "test_helper"
 
 class JobSearchServiceTest < ActiveSupport::TestCase
-  test "builds keyword query with active and optional exact filters" do
+  test "requires every keyword across searchable fields and applies exact filters" do
     response = { "hits" => { "hits" => [ { "_id" => "42" }, { "_id" => "7" } ] } }
     request = nil
     search = ->(**arguments) { request = arguments; response }
@@ -16,8 +16,11 @@ class JobSearchServiceTest < ActiveSupport::TestCase
     assert_equal 1000, request[:body][:size]
     assert_equal false, request[:body][:_source]
     query = request[:body][:query][:bool]
-    assert_equal "rails developer", query[:must][:multi_match][:query]
-    assert_equal %w[title^3 description company_name location skills], query[:must][:multi_match][:fields]
+    assert_equal %w[rails developer], query[:must].map { |clause| clause[:multi_match][:query] }
+    query[:must].each do |clause|
+      assert_equal %w[title^3 description company_name location skills experience_level],
+                   clause[:multi_match][:fields]
+    end
     assert_equal [
       { term: { status: "active" } },
       { term: { "location.keyword" => "Lahore" } },
