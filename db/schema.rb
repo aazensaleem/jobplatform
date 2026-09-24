@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_22_105244) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_24_122900) do
   create_table "applications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "cover_letter"
     t.datetime "created_at", null: false
@@ -49,6 +49,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_105244) do
     t.index ["company_id"], name: "index_jobs_on_company_id"
   end
 
+  create_table "notifications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.text "message", null: false
+    t.datetime "read_at"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "saved_jobs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "job_id", null: false
@@ -76,6 +86,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_105244) do
   add_foreign_key "applications", "users"
   add_foreign_key "companies", "users"
   add_foreign_key "jobs", "companies"
+  add_foreign_key "notifications", "users"
   add_foreign_key "saved_jobs", "jobs"
   add_foreign_key "saved_jobs", "users"
 end

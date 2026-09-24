@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_one :company, dependent: :destroy
   has_many :applications, dependent: :destroy
   has_many :saved_jobs, dependent: :destroy
+  has_many :notifications, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
   validates :role, inclusion: { in: ROLES }

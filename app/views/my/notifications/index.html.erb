@@ -1,0 +1,23 @@
+<h1>Notifications</h1>
+
+<% if @notifications.any? %>
+  <table>
+    <thead><tr><th>Message</th><th>When</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% @notifications.each do |notification| %>
+        <tr>
+          <td><%= notification.message %></td>
+          <td><%= notification.created_at.to_fs(:long) %></td>
+          <td><%= notification.read_at? ? "Read" : "Unread" %></td>
+          <td>
+            <% unless notification.read_at? %>
+              <%= button_to "Mark as read", my_notification_path(notification), method: :patch %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>You have no notifications yet.</p>
+<% end %>

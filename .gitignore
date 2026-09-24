@@ -8,6 +8,7 @@
 /tmp/*
 /vendor/bundle
 /.env*
+/secretmailjet
 /config/master.key
 /config/credentials/*.key
 /public/assets/

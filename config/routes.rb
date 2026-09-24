@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   namespace :my do
     resources :applications, only: :index
     resources :saved_jobs, only: %i[index destroy]
+    resources :notifications, only: %i[index update]
   end
   resources :jobs do
     patch :close, on: :member

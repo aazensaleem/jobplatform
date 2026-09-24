@@ -14,6 +14,7 @@ roles and save listings.
 - Redis and Sidekiq background job processing, with a console check job
 - Employer dashboard and applicant status updates
 - Candidate applications and saved jobs
+- In-app notifications for applications, new applicants, and status changes
 
 ## Requirements
 
@@ -50,6 +51,16 @@ development, run `bin/rails console` and update the registered account:
 ```ruby
 User.find_by!(email: "your-email@example.com").update!(role: "employer")
 ```
+
+## Notifications
+
+Sign in and open **Notifications** in the navigation, or visit
+`/my/notifications`. A successful application creates a confirmation for the
+candidate and a new applicant notice for the job's employer. A real application
+status change creates a new notice for the candidate. The navigation shows the
+unread count, and each notice can be marked as read. Notices are stored in MySQL
+as part of the application or status change; Redis, Sidekiq, and email settings
+are not needed for this page.
 
 ## Checks
 

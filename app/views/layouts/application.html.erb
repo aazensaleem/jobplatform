@@ -28,6 +28,7 @@
       <%= link_to "Companies", companies_path %> |
 
       <% if user_signed_in? %>
+        <%= link_to "Notifications (#{current_user.notifications.where(read_at: nil).count})", my_notifications_path %> |
         <% if current_user.candidate? %>
           <%= link_to "My applications", my_applications_path %> |
           <%= link_to "My saved jobs", my_saved_jobs_path %> |
