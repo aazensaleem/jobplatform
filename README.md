@@ -15,6 +15,8 @@ roles and save listings.
 - Employer dashboard and applicant status updates
 - Candidate applications and saved jobs
 - In-app notifications for applications, new applicants, and status changes
+- Scheduled job expiry, daily candidate alerts, and weekly statistics
+- Responsive navigation, forms, and tables
 
 ## Requirements
 
@@ -61,6 +63,33 @@ status change creates a new notice for the candidate. The navigation shows the
 unread count, and each notice can be marked as read. Notices are stored in MySQL
 as part of the application or status change; Redis, Sidekiq, and email settings
 are not needed for this page.
+
+Candidates can open **Job alerts** to enable daily matching by location, job
+type, and/or experience level. Filled filters must all match. The first run
+includes currently active matching jobs; later runs alert only for jobs created
+since the previous run. Alerts appear as one summary in Notifications. They are
+off until a candidate enables them.
+
+## Scheduled jobs
+
+Keep Redis and a Sidekiq worker running for the schedules in
+`config/schedule.yml` to execute. The schedules are:
+
+- Hourly, at minute 0: expire active jobs whose deadline has passed. The
+  existing Job callback queues their OpenSearch updates.
+- Daily, at 9:00 AM Asia/Karachi: create candidate job alert notifications.
+- Monday, at 9:00 AM Asia/Karachi: log users, jobs, and applications added in
+  the last seven days, plus current active and expired job counts.
+
+For a manual check in the Rails console, run `ExpireJobsJob.perform_now`,
+`DailyJobAlertsJob.perform_now`, or `WeeklyStatisticsJob.perform_now`.
+`Sidekiq::Cron::Job.all` lists the registered schedules while Redis is running.
+The first two manual commands can change job statuses or create notifications.
+
+Job deadlines entered in forms and shown on job pages use Pakistan time (PKT).
+Rails stores them in UTC. Applications stop at the deadline even if the hourly
+expiry job has not run yet; the status changes to Expired when the next hourly
+check executes. Keep Redis and Sidekiq running for that automatic status change.
 
 ## Checks
 

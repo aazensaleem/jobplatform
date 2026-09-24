@@ -10,6 +10,8 @@ Rails.application.routes.draw do
     resources :applications, only: :index
     resources :saved_jobs, only: %i[index destroy]
     resources :notifications, only: %i[index update]
+    get "job_alerts", to: "job_alerts#edit"
+    patch "job_alerts", to: "job_alerts#update"
   end
   resources :jobs do
     patch :close, on: :member

@@ -1,0 +1,17 @@
+expire_jobs:
+  cron: "0 * * * *"
+  class: "ExpireJobsJob"
+  active_job: true
+  queue: default
+
+daily_job_alerts:
+  cron: "0 9 * * * Asia/Karachi"
+  class: "DailyJobAlertsJob"
+  active_job: true
+  queue: default
+
+weekly_statistics:
+  cron: "0 9 * * 1 Asia/Karachi"
+  class: "WeeklyStatisticsJob"
+  active_job: true
+  queue: default

@@ -1,0 +1,22 @@
+<h1>Job alerts</h1>
+<p>Get a notification each morning when new active jobs match your filters. Choose at least one filter when alerts are on.</p>
+
+<%= form_with model: current_user, url: my_job_alerts_path, method: :patch do |form| %>
+  <% if current_user.errors.any? %>
+    <div class="form-errors">
+      <h2><%= pluralize(current_user.errors.count, "error") %> prevented your preferences from being saved:</h2>
+      <ul>
+        <% current_user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p><%= form.check_box :job_alerts_enabled %> <%= form.label :job_alerts_enabled, "Enable daily alerts" %></p>
+  <p><%= form.label :alert_location, "Location" %><br><%= form.text_field :alert_location, placeholder: "e.g. Lahore" %></p>
+  <p><%= form.label :alert_job_type, "Job type" %><br><%= form.text_field :alert_job_type, placeholder: "e.g. Full-time" %></p>
+  <p><%= form.label :alert_experience_level, "Experience level" %><br><%= form.text_field :alert_experience_level, placeholder: "e.g. Junior" %></p>
+  <p class="form-hint">Filters match the full field value. Filled filters must all match the same job.</p>
+  <%= form.submit "Save alert preferences" %>
+<% end %>

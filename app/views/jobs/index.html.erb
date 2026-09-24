@@ -11,6 +11,7 @@
   <fieldset>
     <legend>Filter jobs</legend>
     <p>Without keywords, filters match the full field value. Keyword searches show active jobs only.</p>
+    <div class="filter-grid">
     <p>
       <%= form.label :q, "Keywords" %>
       <%= form.search_field :q, value: @filters["q"] %>
@@ -37,8 +38,11 @@
       <%= form.collection_select :company_id, @filter_companies, :id, :name,
                                  { include_blank: "All companies", selected: @filters["company_id"] } %>
     </p>
+    </div>
+    <div class="form-actions">
     <%= form.submit "Filter jobs", name: nil %>
     <%= link_to "Clear filters", jobs_path %>
+    </div>
   </fieldset>
 <% end %>
 
@@ -60,7 +64,7 @@
     <tbody>
       <% @jobs.each do |job| %>
         <tr>
-          <td><%= job.title %></td>
+          <td><%= link_to job.title, job %></td>
           <td><%= link_to job.company.name, job.company %></td>
           <td><%= job.location %></td>
           <td><%= job.job_type %></td>

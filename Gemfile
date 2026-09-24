@@ -12,6 +12,7 @@ gem "cancancan", "~> 3.6.1"
 gem "opensearch-ruby", "~> 3.4", require: "opensearch"
 # Background job processing through Redis
 gem "sidekiq", "~> 8.0"
+gem "sidekiq-cron", "~> 2.4"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use mysql as the database for Active Record

@@ -23,32 +23,42 @@
   </head>
 
   <body>
-    <nav>
-      <%= link_to "Jobs", jobs_path %> |
-      <%= link_to "Companies", companies_path %> |
+    <header class="site-header">
+      <div class="site-header-inner">
+        <%= link_to "Job Marketplace", root_path, class: "site-brand" %>
+        <nav class="site-nav" aria-label="Main navigation">
+          <%= link_to "Jobs", jobs_path %>
+          <%= link_to "Companies", companies_path %>
 
-      <% if user_signed_in? %>
-        <%= link_to "Notifications (#{current_user.notifications.where(read_at: nil).count})", my_notifications_path %> |
-        <% if current_user.candidate? %>
-          <%= link_to "My applications", my_applications_path %> |
-          <%= link_to "My saved jobs", my_saved_jobs_path %> |
-        <% end %>
-        <% if current_user.employer? %>
-          <%= link_to "My job listings", employer_jobs_path %> |
-        <% end %>
-        Signed in as <%= current_user.email %> (<%= current_user.role %>) |
-        <%= link_to "Account", edit_user_registration_path %> |
-        <%= button_to "Sign out", destroy_user_session_path, method: :delete,
-                      form: { style: "display: inline" } %>
-      <% else %>
-        <%= link_to "Sign up", new_user_registration_path %> |
-        <%= link_to "Sign in", new_user_session_path %>
-      <% end %>
-    </nav>
+          <% if user_signed_in? %>
+            <%= link_to "Notifications (#{current_user.notifications.where(read_at: nil).count})", my_notifications_path %>
+            <% if current_user.candidate? %>
+              <%= link_to "My applications", my_applications_path %>
+              <%= link_to "My saved jobs", my_saved_jobs_path %>
+              <%= link_to "Job alerts", my_job_alerts_path %>
+            <% end %>
+            <% if current_user.employer? %>
+              <%= link_to "My job listings", employer_jobs_path %>
+            <% end %>
+          <% end %>
+        </nav>
+        <div class="site-account">
+          <% if user_signed_in? %>
+            <span class="account-label"><%= current_user.email %> · <%= current_user.role.humanize %></span>
+            <%= link_to "Account", edit_user_registration_path %>
+            <%= button_to "Sign out", destroy_user_session_path, method: :delete %>
+          <% else %>
+            <%= link_to "Sign in", new_user_session_path %>
+            <%= link_to "Sign up", new_user_registration_path, class: "header-signup" %>
+          <% end %>
+        </div>
+      </div>
+    </header>
 
-    <p><%= notice %></p>
-    <p><%= alert %></p>
-
-    <%= yield %>
+    <main class="page-shell">
+      <% if notice.present? %><div class="flash flash-notice" role="status"><%= notice %></div><% end %>
+      <% if alert.present? %><div class="flash flash-alert" role="alert"><%= alert %></div><% end %>
+      <%= yield %>
+    </main>
   </body>
 </html>

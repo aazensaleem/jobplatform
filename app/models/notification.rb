@@ -1,5 +1,5 @@
 class Notification < ApplicationRecord
-  KINDS = %w[application_submitted new_applicant status_changed].freeze
+  KINDS = %w[application_submitted new_applicant status_changed job_alert].freeze
 
   belongs_to :user
 
