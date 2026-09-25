@@ -4,7 +4,7 @@ source "https://rubygems.org"
 gem "rails", "~> 8.1.3", ">= 8.1.3.1"
 # Rails 8.1 passes JSON parser options as a positional hash; JSON 3 requires
 # keywords and is not compatible yet.
-gem "json", "~> 2.21.2"
+gem "json", "~> 3.0.2"
 # Authentication and role-based authorization
 gem "devise", "~> 5.0.4"
 gem "cancancan", "~> 3.6.1"
