@@ -42,4 +42,10 @@ class OpenSearchJobsTest < ActiveSupport::TestCase
       assert_raises(IOError) { IndexJobInOpenSearchJob.perform_now(jobs(:one).id) }
     end
   end
+
+  test "deletion failures propagate so Sidekiq can retry" do
+    with_stubbed_method(JobSearchIndex, :delete, ->(*) { raise IOError, "OpenSearch unavailable" }) do
+      assert_raises(IOError) { DeleteJobFromOpenSearchJob.perform_now(jobs(:one).id) }
+    end
+  end
 end

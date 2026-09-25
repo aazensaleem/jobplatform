@@ -13,7 +13,7 @@ class JobSearchService
     filters << { term: { "location.keyword" => @location } } if @location.present?
     filters << { term: { job_type: @job_type } } if @job_type.present?
     filters << { term: { experience_level: @experience_level } } if @experience_level.present?
-    fields = %w[title^3 description company_name location skills experience_level]
+    fields = %w[title^3 company_name location job_type experience_level skills]
     terms = @query.split.map { |term| { multi_match: { query: term, fields: fields } } }
 
     response = OPENSEARCH_CLIENT.search(

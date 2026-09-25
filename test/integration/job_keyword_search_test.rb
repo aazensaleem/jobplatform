@@ -44,4 +44,15 @@ class JobKeywordSearchTest < ActionDispatch::IntegrationTest
     assert_select "p", text: /Keyword search is unavailable/
     assert_select "tbody tr", count: 0
   end
+
+  test "connection failure shows the same unavailable message" do
+    unavailable = ->(**) { raise Faraday::ConnectionFailed, "OpenSearch unavailable" }
+    with_stubbed_method(OPENSEARCH_CLIENT, :search, unavailable) do
+      get jobs_path, params: { q: "rails" }
+    end
+
+    assert_response :success
+    assert_select "p", text: /Keyword search is unavailable/
+    assert_select "tbody tr", count: 0
+  end
 end

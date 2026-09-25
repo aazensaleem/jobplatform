@@ -1,6 +1,14 @@
 require "test_helper"
 
 class JobTest < ActiveSupport::TestCase
+  test "a job needs a title and company" do
+    job = Job.new(description: "Details")
+
+    assert_not job.valid?
+    assert_includes job.errors[:title], "can't be blank"
+    assert_includes job.errors[:company], "must exist"
+  end
+
   test "search document includes job and company fields without private account data" do
     job = jobs(:one)
     assert_equal({

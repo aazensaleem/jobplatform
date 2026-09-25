@@ -39,10 +39,10 @@ if Rails.env.development?
 
     jobs = 150.times.map do |index|
       company = companies[index % companies.length]
-      company.jobs.find_or_create_by!(title: "#{titles[index % titles.length]} (Demo #{index + 1})") do |job|
+      job = company.jobs.find_or_create_by!(title: "#{titles[index % titles.length]} (Demo #{index + 1})") do |job|
         job.description = "#{Faker::Lorem.paragraph(sentence_count: 3)} Apply your skills to a growing team."
         job.location = locations[index % locations.length]
-        job.job_type = job_types[index % job_types.length]
+        job.job_type = job.location == "Remote" ? "remote" : job_types[index % job_types.length]
         job.experience_level = levels[(index / 3) % levels.length]
         job.salary_min = 60_000 + (index % 10) * 10_000
         job.salary_max = job.salary_min + 50_000
@@ -54,6 +54,8 @@ if Rails.env.development?
         end
         job.deadline = job.status == "active" ? 1.year.from_now + index.days : nil
       end
+      job.update!(job_type: "remote") if job.location == "Remote" && job.job_type != "remote"
+      job
     end
 
     active_jobs = jobs.first(120)

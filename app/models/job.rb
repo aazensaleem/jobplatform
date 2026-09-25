@@ -10,6 +10,7 @@ class Job < ApplicationRecord
   validates :salary_min, :salary_max,
             numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
+  after_create_commit :log_creation
   after_commit :sync_search_index, on: %i[create update]
   after_commit :remove_from_search_index, on: :destroy
 
@@ -34,14 +35,24 @@ class Job < ApplicationRecord
 
   private
 
+  def log_creation
+    Rails.logger.info("Job created: id=#{id} company_id=#{company_id}")
+  end
+
   def sync_search_index
-    IndexJobInOpenSearchJob.perform_later(id) if Rails.configuration.x.opensearch_sync
+    return unless Rails.configuration.x.opensearch_sync
+
+    queued_job = IndexJobInOpenSearchJob.perform_later(id)
+    Rails.logger.info("OpenSearch indexing queued for job_id=#{id}") if queued_job
   rescue StandardError => error
     Rails.logger.error("Could not enqueue OpenSearch indexing for job #{id}: #{error.class}: #{error.message}")
   end
 
   def remove_from_search_index
-    DeleteJobFromOpenSearchJob.perform_later(id) if Rails.configuration.x.opensearch_sync
+    return unless Rails.configuration.x.opensearch_sync
+
+    queued_job = DeleteJobFromOpenSearchJob.perform_later(id)
+    Rails.logger.info("OpenSearch deletion queued for job_id=#{id}") if queued_job
   rescue StandardError => error
     Rails.logger.error("Could not enqueue OpenSearch deletion for job #{id}: #{error.class}: #{error.message}")
   end

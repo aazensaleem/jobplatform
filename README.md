@@ -89,6 +89,15 @@ job, company, status, and application date; companies filters name, employer,
 and creation date. WiceGrid is kept as a local Rails 8.1 compatibility build in
 `vendor/wice_grid-7.1.4` because its published 7.1.4 gem requires Rails 7.
 
+## Error responses
+
+Missing records return HTTP 404, unauthorized access returns HTTP 403, and
+invalid submissions return HTTP 422 with validation messages. Duplicate
+applications and applications to closed or expired jobs are rejected. If
+OpenSearch is unavailable, keyword search shows a clear message. If Redis is
+unavailable during a job write, the job still saves in MySQL; reindex after
+restoring Redis and OpenSearch to refresh keyword search.
+
 ## Pagination and demo data
 
 The Jobs page, My applications, My saved jobs, and the employer job listings
@@ -107,7 +116,9 @@ The seed is repeatable and leaves existing records in place. It adds 50
 candidate accounts, 10 approved employers, 10 companies, 150 jobs, 200
 applications, and 100 saved jobs. Seed accounts use the reserved
 `example.test` domain and random passwords. `Faker` is used only in development.
-OpenSearch must be running for the reindex command.
+Jobs with `Remote` as their location use `remote` as their job type. Rerunning
+the seed repairs older demo jobs with conflicting values. OpenSearch must be
+running for the reindex command.
 
 ## Notifications
 
@@ -157,9 +168,10 @@ bin/rubocop
 ## OpenSearch search and reindex
 
 The Jobs page uses OpenSearch when Keywords is filled in. It shows active jobs
-only. Every keyword must match a searchable field, including title, description,
-company name, location, skills, or experience level. Separate location, job
-type, and experience level fields apply exact filters.
+only. Every keyword must match a searchable field: title, company name,
+location, job type, experience level, or skills. Description and status are not
+keyword-searchable. Separate location, job type, and experience level fields
+apply exact filters.
 Without keywords, the existing MySQL filters continue to work for all statuses.
 Before starting OpenSearch, check whether it is already running:
 
@@ -248,6 +260,19 @@ This check job only writes a log line. Job creates, edits, deletes, and company
 renames also enqueue work on the default queue. A queued index job reads the
 current MySQL record when it runs, and a queued delete job removes the document
 by ID.
+
+## Logs
+
+Rails writes request and application events to `log/development.log`; Sidekiq
+prints worker events in its terminal. Job and application creation logs contain
+record IDs. Search queueing logs identify the job ID; indexing and deletion
+workers log success or failure and let failures reach Sidekiq for retry. The
+scheduled expiry job logs how many jobs it expired on each run. Follow the Rails
+log with:
+
+```bash
+tail -f log/development.log
+```
 
 ## Employer listings
 

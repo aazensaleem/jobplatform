@@ -10,8 +10,13 @@ class Application < ApplicationRecord
 
   after_create :notify_application_submitted
   after_update :notify_status_changed, if: :saved_change_to_status?
+  after_create_commit :log_creation
 
   private
+
+  def log_creation
+    Rails.logger.info("Application created: id=#{id} job_id=#{job_id} user_id=#{user_id}")
+  end
 
   def notify_application_submitted
     user.notifications.create!(kind: "application_submitted", message: "Your application for #{job.title} at #{job.company.name} was submitted.")
