@@ -26,8 +26,62 @@ class EmployerWorkflowTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", edit_company_path(companies(:two)), count: 0
   end
 
+  test "jobs page checkbox shows only the employers listings across owned companies" do
+    get jobs_path
+    assert_select "input[name=my_jobs][type=checkbox]", count: 0
+
+    sign_in users(:one)
+    get jobs_path, params: { my_jobs: "1" }
+    assert_select "input[name=my_jobs][type=checkbox]", count: 0
+    assert_select "tbody a[href=?]", job_path(jobs(:one))
+    assert_select "tbody a[href=?]", job_path(jobs(:two))
+    sign_out users(:one)
+
+    employer = users(:two)
+    second_company = employer.companies.create!(name: "Second employer company")
+    second_job = second_company.jobs.create!(title: "Second owned role", description: "Description", status: "draft")
+    sign_in employer
+
+    get jobs_path
+    assert_response :success
+    assert_select "input[name=my_jobs][type=checkbox][data-submit-on-change]"
+    assert_select "input[name=my_jobs][type=checkbox][checked]", count: 0
+    assert_select "tbody a[href=?]", job_path(jobs(:two))
+
+    get jobs_path, params: { my_jobs: "1" }
+    assert_response :success
+    assert_select "input[name=my_jobs][type=checkbox][checked]"
+    assert_select "tbody a[href=?]", job_path(jobs(:one))
+    assert_select "tbody a[href=?]", job_path(second_job)
+    assert_select "tbody a[href=?]", job_path(jobs(:two)), count: 0
+
+    get jobs_path, params: { my_jobs: "1", company_id: companies(:two).id }
+    assert_response :success
+    assert_select "tbody tr", count: 0
+
+    get jobs_path, params: { my_jobs: "0" }
+    assert_select "tbody a[href=?]", job_path(jobs(:two))
+  end
+
+  test "my listings checkbox also limits keyword results" do
+    jobs(:two).update!(status: "active")
+    sign_in users(:two)
+    service = Struct.new(:job_ids).new([ jobs(:one).id, jobs(:two).id ])
+
+    with_stubbed_method(JobSearchService, :new, ->(**) { service }) do
+      get jobs_path, params: { q: "developer", my_jobs: "1" }
+    end
+
+    assert_response :success
+    assert_select "input[name=q][value=developer]"
+    assert_select "input[name=my_jobs][type=checkbox][checked]"
+    assert_select "tbody a[href=?]", job_path(jobs(:one))
+    assert_select "tbody a[href=?]", job_path(jobs(:two)), count: 0
+  end
+
   test "employer without a company can complete setup and manage a listing" do
-    employer = User.create!(email: "new-employer@example.com", password: "password123", role: "employer")
+    employer = User.create!(email: "new-employer@example.com", password: "password123", role: "employer",
+                            employer_approval_status: "approved")
     sign_in employer
 
     get employer_jobs_path
@@ -41,7 +95,7 @@ class EmployerWorkflowTest < ActionDispatch::IntegrationTest
     assert_difference "Company.count", 1 do
       post companies_path, params: { company: { name: "New company", user_id: users(:other_employer).id } }
     end
-    company = employer.reload.company
+    company = employer.reload.companies.first
     assert_equal employer, company.user
     assert_redirected_to company_path(company)
     follow_redirect!

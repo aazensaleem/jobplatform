@@ -1,0 +1,21 @@
+<h1>Admin · Applications</h1>
+<%= render "admin/navigation" %>
+
+<% if @applications.any? %>
+  <table>
+    <thead><tr><th>Candidate</th><th>Job</th><th>Company</th><th>Status</th><th>Applied</th></tr></thead>
+    <tbody>
+      <% @applications.each do |application| %>
+        <tr>
+          <td><%= link_to application.user.email, admin_user_path(application.user) %></td>
+          <td><%= link_to application.job.title, admin_application_path(application) %></td>
+          <td><%= link_to application.job.company.name, admin_company_path(application.job.company) %></td>
+          <td><%= application.status.humanize %></td>
+          <td><%= application.created_at.to_fs(:long) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No applications yet.</p>
+<% end %>

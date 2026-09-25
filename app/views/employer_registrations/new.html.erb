@@ -1,0 +1,22 @@
+<h1>Sign up as an employer</h1>
+<p>Your account will be reviewed by an admin before you can create companies or post jobs.</p>
+
+<%= form_with model: resource, scope: :user, url: employer_registration_path do |form| %>
+  <% if resource.errors.any? %>
+    <div class="form-errors" role="alert">
+      <h2><%= pluralize(resource.errors.count, "error") %> prevented your signup:</h2>
+      <ul>
+        <% resource.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p><%= form.label :email %><%= form.email_field :email, autofocus: true, autocomplete: "email", required: true %></p>
+  <p><%= form.label :password %><%= form.password_field :password, autocomplete: "new-password", required: true %></p>
+  <p><%= form.label :password_confirmation %><%= form.password_field :password_confirmation, autocomplete: "new-password", required: true %></p>
+  <p><%= form.submit "Request employer account" %></p>
+<% end %>
+
+<p><%= link_to "Sign up as a candidate", new_user_registration_path %></p>

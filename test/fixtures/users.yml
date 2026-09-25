@@ -8,11 +8,13 @@ one:
 two:
   email: employer@example.com
   role: employer
+  employer_approval_status: approved
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
 
 other_employer:
   email: other-employer@example.com
   role: employer
+  employer_approval_status: approved
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
 
 admin:

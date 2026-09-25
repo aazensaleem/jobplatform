@@ -42,17 +42,32 @@ class JobFilteringTest < ActionDispatch::IntegrationTest
     assert_select "p", text: "No jobs match your filters."
   end
 
-  test "blank filters and clear URL preserve all statuses and newest first ordering" do
+  test "blank filters and clear URL preserve all statuses with active jobs first" do
     [ {}, { location: "  ", job_type: "", experience_level: " ", status: "", company_id: "" } ].each do |filters|
       get jobs_path, params: filters
       assert_response :success
       assert_select "tbody tr", count: 2
-      assert_select "tbody tr:first-child td:first-child", text: @second.title
+      assert_select "tbody tr:first-child td:first-child", text: @first.title
     end
     get root_path, params: { status: "closed" }
     assert_response :success
     assert_select "tbody tr", count: 1
     assert_select "tbody a[href=?]", job_path(@second)
+  end
+
+  test "public listing puts expired jobs last and keeps newest first within each status" do
+    newer_active = @first.company.jobs.create!(title: "Newer active", description: "Details",
+                                               status: "active", created_at: 1.hour.ago)
+    newer_expired = @first.company.jobs.create!(title: "Newer expired", description: "Details",
+                                                status: "expired", created_at: Time.current)
+    older_expired = @first.company.jobs.create!(title: "Older expired", description: "Details",
+                                                status: "expired", created_at: 3.days.ago)
+
+    get jobs_path
+
+    assert_response :success
+    assert_equal [ newer_active, @first, @second, newer_expired, older_expired ].map(&:title),
+                 css_select("tbody tr td:first-child a").map(&:text)
   end
 
   test "text values are literal full matches and unknown values give empty results" do

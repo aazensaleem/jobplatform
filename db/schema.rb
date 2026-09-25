@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_24_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_25_090000) do
   create_table "applications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "cover_letter"
     t.datetime "created_at", null: false
@@ -75,6 +75,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_24_140000) do
     t.string "alert_location"
     t.datetime "created_at", null: false
     t.string "email", null: false
+    t.string "employer_approval_status"
+    t.datetime "employer_decided_at"
     t.string "encrypted_password", default: "", null: false
     t.boolean "job_alerts_enabled", default: false, null: false
     t.datetime "last_job_alerted_at"

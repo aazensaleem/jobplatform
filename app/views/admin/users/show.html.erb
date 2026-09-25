@@ -1,0 +1,35 @@
+<h1><%= @user.email %></h1>
+<%= render "admin/navigation" %>
+
+<dl>
+  <dt>Role</dt><dd><%= @user.role.humanize %></dd>
+  <% if @user.employer? %>
+    <dt>Employer approval</dt><dd><%= @user.employer_approval_status.humanize %></dd>
+    <dt>Decision made</dt><dd><%= @user.employer_decided_at&.to_fs(:long) || "Not yet" %></dd>
+  <% end %>
+  <dt>Joined</dt><dd><%= @user.created_at.to_fs(:long) %></dd>
+  <dt>Companies</dt>
+  <dd>
+    <% if @user.companies.any? %>
+      <% @user.companies.order(:name).each do |company| %>
+        <div><%= link_to company.name, admin_company_path(company) %></div>
+      <% end %>
+    <% else %>
+      None
+    <% end %>
+  </dd>
+  <dt>Applications</dt><dd><%= @user.applications.count %></dd>
+</dl>
+
+<p><%= link_to "Back to users", admin_users_path %></p>
+<% if @user.employer_pending? || @user.employer_declined? %>
+  <%= button_to "Approve employer", approve_admin_user_path(@user), method: :patch %>
+<% end %>
+<% if @user.employer_pending? %>
+  <%= button_to "Decline employer", decline_admin_user_path(@user), method: :patch,
+                data: { confirm: "Decline this employer request?" } %>
+<% end %>
+<% unless @user == current_user %>
+  <%= button_to "Remove user", admin_user_path(@user), method: :delete,
+                data: { confirm: "Remove this user and all their related records?" } %>
+<% end %>

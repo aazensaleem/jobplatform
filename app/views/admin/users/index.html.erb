@@ -1,0 +1,34 @@
+<h1>Admin · Users</h1>
+<%= render "admin/navigation" %>
+<p><%= link_to "Pending employer requests (#{@pending_employers_count})", admin_users_path(role: "employer", approval_status: "pending") %></p>
+
+<%= form_with url: admin_users_path, method: :get do |form| %>
+  <fieldset>
+    <legend>Filter users</legend>
+    <div class="filter-grid">
+      <p><%= form.label :email, "Email contains" %><%= form.search_field :email, value: @email %></p>
+      <p><%= form.label :role %><%= form.select :role, User::ROLES.map { |role| [role.humanize, role] }, { include_blank: "All roles", selected: @role } %></p>
+      <p><%= form.label :approval_status, "Employer approval" %><%= form.select :approval_status, User::EMPLOYER_APPROVAL_STATUSES.map { |status| [status.humanize, status] }, { include_blank: "Any status", selected: @approval_status } %></p>
+    </div>
+    <div class="form-actions"><%= form.submit "Filter" %><%= link_to "Clear filters", admin_users_path %></div>
+  </fieldset>
+<% end %>
+
+<% if @users.any? %>
+  <table>
+    <thead><tr><th>Email</th><th>Role</th><th>Employer approval</th><th>Joined</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% @users.each do |user| %>
+        <tr>
+          <td><%= link_to user.email, admin_user_path(user) %></td>
+          <td><%= user.role.humanize %></td>
+          <td><%= user.employer? ? user.employer_approval_status.humanize : "—" %></td>
+          <td><%= user.created_at.to_fs(:long) %></td>
+          <td><%= link_to "Inspect", admin_user_path(user) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No users match these filters.</p>
+<% end %>

@@ -113,7 +113,8 @@ class AuthenticationAuthorizationTest < ActionDispatch::IntegrationTest
   end
 
   test "an employer without a company sees an empty companies page" do
-    employer = User.create!(email: "no-company@example.com", password: "password123", role: "employer")
+    employer = User.create!(email: "no-company@example.com", password: "password123", role: "employer",
+                            employer_approval_status: "approved")
     sign_in employer
 
     get companies_path

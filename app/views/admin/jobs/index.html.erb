@@ -1,0 +1,27 @@
+<h1>Admin · Jobs</h1>
+<%= render "admin/navigation" %>
+
+<% if @jobs.any? %>
+  <table>
+    <thead><tr><th>Title</th><th>Company</th><th>Employer</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% @jobs.each do |job| %>
+        <tr>
+          <td><%= link_to job.title, job_path(job) %></td>
+          <td><%= link_to job.company.name, admin_company_path(job.company) %></td>
+          <td><%= link_to job.company.user.email, admin_user_path(job.company.user) %></td>
+          <td><%= job.status.humanize %></td>
+          <td>
+            <% unless job.status == "closed" %>
+              <%= button_to "Close job", close_admin_job_path(job), method: :patch %>
+            <% end %>
+            <%= button_to "Delete job", admin_job_path(job), method: :delete,
+                          data: { confirm: "Delete this job and its applications?" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No jobs yet.</p>
+<% end %>

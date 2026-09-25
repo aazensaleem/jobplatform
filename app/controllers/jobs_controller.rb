@@ -6,13 +6,15 @@ class JobsController < ApplicationController
     authorize! :read, Job
     @filters = params.permit(:q, :location, :job_type, :experience_level, :status, :company_id)
                      .to_h.transform_values { |value| value.to_s.strip }.reject { |_, value| value.blank? }
+    @my_jobs = current_user&.employer_approved? && params.permit(:my_jobs)[:my_jobs] == "1"
     @jobs = if @filters["q"].present?
       ids = JobSearchService.new(query: @filters["q"], location: @filters["location"],
                                  job_type: @filters["job_type"],
                                  experience_level: @filters["experience_level"]).job_ids
       Job.includes(:company).where(id: ids, status: "active").in_order_of(:id, ids)
     else
-      Job.includes(:company).order(created_at: :desc).where(@filters.except("company_id"))
+      Job.includes(:company).where(@filters.except("company_id"))
+         .in_order_of(:status, %w[active draft closed expired]).order(created_at: :desc)
     end
     @jobs = @jobs.none if @filters["q"].present? && @filters["status"].present? && @filters["status"] != "active"
     if @filters["company_id"].present?
@@ -22,6 +24,7 @@ class JobsController < ApplicationController
         @jobs.none
       end
     end
+    @jobs = @jobs.where(company_id: current_user.companies.select(:id)) if @my_jobs
     @filter_companies = Company.order(:name)
   rescue OpenSearch::Transport::Transport::Error, Faraday::Error => error
     raise unless @filters&.key?("q")

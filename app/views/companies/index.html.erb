@@ -30,7 +30,7 @@
             <% end %>
             <% if can?(:destroy, company) %>
               <%= button_to "Delete", company, method: :delete,
-                            data: { turbo_confirm: "Delete this company and its jobs?" } %>
+                            data: { confirm: "Delete this company and all its jobs?" } %>
             <% end %>
           </td>
         </tr>
@@ -38,5 +38,5 @@
     </tbody>
   </table>
 <% else %>
-  <p><%= current_user&.employer? ? "You have not created a company yet." : "No companies have been created yet." %></p>
+  <p><%= current_user&.employer_approved? ? "You have not created a company yet." : "No companies have been created yet." %></p>
 <% end %>

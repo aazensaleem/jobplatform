@@ -106,6 +106,7 @@ input[type="submit"]:hover, button:hover { background: #0f488f; }
 .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 18px; }
 .filter-grid input, .filter-grid select { width: 100%; }
 .form-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 15px; }
+.admin-navigation { display: flex; flex-wrap: wrap; gap: 12px 20px; margin: 0 0 24px; }
 
 table {
   display: block;

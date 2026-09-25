@@ -9,7 +9,8 @@
           <td><%= link_to saved_job.job.title, saved_job.job %></td>
           <td><%= saved_job.job.company.name %></td>
           <td><%= saved_job.job.status.humanize %></td>
-          <td><%= button_to "Unsave", my_saved_job_path(saved_job), method: :delete %></td>
+          <td><%= button_to "Unsave", my_saved_job_path(saved_job), method: :delete,
+                              data: { confirm: "Remove this job from your saved jobs?" } %></td>
         </tr>
       <% end %>
     </tbody>

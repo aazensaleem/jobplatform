@@ -29,7 +29,8 @@
               <% unless job.status == "closed" %>
                 <%= button_to "Close job", close_job_path(job), method: :patch %>
               <% end %>
-              <%= button_to "Delete job", job, method: :delete %>
+              <%= button_to "Delete job", job, method: :delete,
+                            data: { confirm: "Delete this job?" } %>
             </td>
           </tr>
         <% end %>

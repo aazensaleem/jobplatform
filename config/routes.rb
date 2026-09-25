@@ -1,5 +1,21 @@
 Rails.application.routes.draw do
   devise_for :users
+  devise_scope :user do
+    get "employers/sign_up", to: "employer_registrations#new", as: :new_employer_registration
+    post "employers", to: "employer_registrations#create", as: :employer_registration
+  end
+  namespace :admin do
+    root to: "users#index"
+    resources :users, only: %i[index show destroy] do
+      patch :approve, on: :member
+      patch :decline, on: :member
+    end
+    resources :companies, only: %i[index show destroy]
+    resources :jobs, only: %i[index destroy] do
+      patch :close, on: :member
+    end
+    resources :applications, only: %i[index show]
+  end
   namespace :employer do
     resources :jobs, only: :index do
       resources :applications, only: :index

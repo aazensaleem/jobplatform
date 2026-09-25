@@ -36,5 +36,5 @@
 
 <% if can?(:destroy, @company) %>
   <%= button_to "Delete company", @company, method: :delete,
-                data: { turbo_confirm: "Delete this company and its jobs?" } %>
+                data: { confirm: "Delete this company and all its jobs?" } %>
 <% end %>

@@ -9,7 +9,8 @@
     <p>This job is not accepting applications.</p>
   <% end %>
   <% if @saved_job %>
-    <%= button_to "Unsave job", my_saved_job_path(@saved_job), method: :delete %>
+    <%= button_to "Unsave job", my_saved_job_path(@saved_job), method: :delete,
+                  data: { confirm: "Remove this job from your saved jobs?" } %>
   <% else %>
     <%= button_to "Save job", job_saved_jobs_path(@job) %>
   <% end %>
@@ -64,7 +65,7 @@
 
 <% if can?(:destroy, @job) %>
   <%= button_to "Delete job", @job, method: :delete,
-                data: { turbo_confirm: "Delete this job?" } %>
+                data: { confirm: "Delete this job?" } %>
 <% end %>
 
 <% if can?(:close, @job) && @job.status != "closed" %>

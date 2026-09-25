@@ -12,7 +12,8 @@ class Ability
 
     if user.admin?
       can :manage, :all
-    elsif user.employer?
+      can :access, :admin
+    elsif user.employer_approved?
       can :read, :employer_dashboard
       can :create, Company
       can %i[update destroy], Company, user_id: user.id

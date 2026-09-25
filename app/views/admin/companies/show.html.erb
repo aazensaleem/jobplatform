@@ -1,0 +1,28 @@
+<h1><%= @company.name %></h1>
+<%= render "admin/navigation" %>
+
+<dl>
+  <dt>Employer</dt><dd><%= link_to @company.user.email, admin_user_path(@company.user) %></dd>
+  <dt>Location</dt><dd><%= @company.location.presence || "Not specified" %></dd>
+  <dt>Description</dt><dd><%= simple_format(@company.description.presence || "Not specified") %></dd>
+</dl>
+
+<h2>Jobs</h2>
+<% if @jobs.any? %>
+  <table>
+    <thead><tr><th>Title</th><th>Status</th></tr></thead>
+    <tbody>
+      <% @jobs.each do |job| %>
+        <tr>
+          <td><%= link_to job.title, job_path(job) %></td>
+          <td><%= job.status.humanize %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>This company has no jobs yet.</p>
+<% end %>
+<p><%= link_to "Back to companies", admin_companies_path %></p>
+<%= button_to "Delete company", admin_company_path(@company), method: :delete,
+              data: { confirm: "Delete this company and all its jobs and applications?" } %>

@@ -17,6 +17,8 @@ roles and save listings.
 - In-app notifications for applications, new applicants, and status changes
 - Scheduled job expiry, daily candidate alerts, and weekly statistics
 - Responsive navigation, forms, and tables
+- Admin pages for users, companies, jobs, and applications
+- Employer signup with admin approval or decline before posting
 
 ## Requirements
 
@@ -47,12 +49,35 @@ bin/rails server
 
 Open <http://localhost:3000>.
 
-New registrations are candidates. To make an account an employer for local
-development, run `bin/rails console` and update the registered account:
+**Sign up** creates a candidate account. **Employer sign up** creates an
+employer account that waits for admin review. Both options are in the signed-out
+navigation.
 
-```ruby
-User.find_by!(email: "your-email@example.com").update!(role: "employer")
-```
+## Employer approval
+
+New employers sign in and return to the public Jobs page. They can browse jobs
+and companies and manage their account while a persistent banner says their
+request is pending. They cannot create or manage companies, post or manage jobs,
+or review applicants until an admin approves them. The admin can filter users by
+employer approval status and approve or decline a pending request from the user
+detail page. A declined employer remains able to sign in and browse, sees a
+clear declined message, and has no employer management permissions. An admin
+can later approve a declined request. Existing employers were marked approved
+when the migration ran, preserving their previous access.
+If Rails was already running when this migration ran, use `bin/rails restart`
+so the server loads the new User columns.
+
+## Admin area
+
+Sign in with an admin account and open **Admin** in the navigation, or visit
+`/admin`. The area lists users, companies, jobs, and applications. Admins can
+filter users by email, role, and employer approval, inspect a company's employer
+and jobs, inspect application status and cover letter, close or delete jobs,
+delete individual companies, and remove users. Deleting a company also deletes
+its jobs and their applications, while keeping the employer's other companies.
+Removing a user removes all their companies and related records; the signed-in
+admin cannot remove their own account. Other roles get HTTP 403, and visitors
+are sent to sign in.
 
 ## Notifications
 
@@ -193,3 +218,11 @@ This check job only writes a log line. Job creates, edits, deletes, and company
 renames also enqueue work on the default queue. A queued index job reads the
 current MySQL record when it runs, and a queued delete job removes the document
 by ID.
+
+## Employer listings
+
+Employers can browse every listing on `/jobs`. Checking **Show only my job
+listings** above the results refreshes that same page with jobs from only their
+own companies. It works with the other filters and includes draft, active,
+closed, and expired listings when no keyword is entered. Uncheck it to see all
+jobs again.

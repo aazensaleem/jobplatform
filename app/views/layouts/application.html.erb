@@ -20,6 +20,8 @@
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "confirmations", defer: true %>
+    <%= javascript_include_tag "job_filters", defer: true %>
   </head>
 
   <body>
@@ -37,8 +39,8 @@
               <%= link_to "My saved jobs", my_saved_jobs_path %>
               <%= link_to "Job alerts", my_job_alerts_path %>
             <% end %>
-            <% if current_user.employer? %>
-              <%= link_to "My job listings", employer_jobs_path %>
+            <% if current_user.admin? %>
+              <%= link_to "Admin", admin_root_path %>
             <% end %>
           <% end %>
         </nav>
@@ -50,6 +52,7 @@
           <% else %>
             <%= link_to "Sign in", new_user_session_path %>
             <%= link_to "Sign up", new_user_registration_path, class: "header-signup" %>
+            <%= link_to "Employer sign up", new_employer_registration_path %>
           <% end %>
         </div>
       </div>
@@ -58,6 +61,11 @@
     <main class="page-shell">
       <% if notice.present? %><div class="flash flash-notice" role="status"><%= notice %></div><% end %>
       <% if alert.present? %><div class="flash flash-alert" role="alert"><%= alert %></div><% end %>
+      <% if current_user&.employer_pending? %>
+        <div class="flash flash-notice" role="status">Your employer account is waiting for admin approval. You can browse jobs and companies while we review your request.</div>
+      <% elsif current_user&.employer_declined? %>
+        <div class="flash flash-alert" role="status">Your employer request was declined. You cannot create companies or post jobs. Contact an administrator if you believe this was a mistake.</div>
+      <% end %>
       <%= yield %>
     </main>
   </body>

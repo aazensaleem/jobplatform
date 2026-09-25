@@ -4,16 +4,19 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   ROLES = %w[candidate employer admin].freeze
+  EMPLOYER_APPROVAL_STATUSES = %w[pending approved declined].freeze
 
-  has_one :company, dependent: :destroy
+  has_many :companies, dependent: :destroy
   has_many :applications, dependent: :destroy
   has_many :saved_jobs, dependent: :destroy
   has_many :notifications, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
   validates :role, inclusion: { in: ROLES }
+  validates :employer_approval_status, inclusion: { in: EMPLOYER_APPROVAL_STATUSES }, if: :employer?
   validate :job_alert_filter_required, if: :job_alerts_enabled?
 
+  before_validation :set_employer_approval_status
   before_validation :normalize_job_alert_filters
   before_save :reset_job_alert_cursor, if: :job_alert_preferences_changed?
 
@@ -21,7 +24,20 @@ class User < ApplicationRecord
     define_method("#{role_name}?") { role == role_name }
   end
 
+  EMPLOYER_APPROVAL_STATUSES.each do |status|
+    define_method("employer_#{status}?") { employer? && employer_approval_status == status }
+  end
+
   private
+
+  def set_employer_approval_status
+    if employer?
+      self.employer_approval_status ||= "pending"
+    else
+      self.employer_approval_status = nil
+      self.employer_decided_at = nil
+    end
+  end
 
   def normalize_job_alert_filters
     %i[alert_location alert_job_type alert_experience_level].each do |attribute|

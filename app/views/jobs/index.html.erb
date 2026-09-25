@@ -39,6 +39,12 @@
                                  { include_blank: "All companies", selected: @filters["company_id"] } %>
     </p>
     </div>
+    <% if current_user&.employer_approved? %>
+      <p>
+        <%= form.check_box :my_jobs, checked: @my_jobs, data: { submit_on_change: true } %>
+        <%= form.label :my_jobs, "Show only my job listings" %>
+      </p>
+    <% end %>
     <div class="form-actions">
     <%= form.submit "Filter jobs", name: nil %>
     <%= link_to "Clear filters", jobs_path %>
@@ -77,7 +83,7 @@
             <% end %>
             <% if can?(:destroy, job) %>
               <%= button_to "Delete", job, method: :delete,
-                            data: { turbo_confirm: "Delete this job?" } %>
+                            data: { confirm: "Delete this job?" } %>
             <% end %>
           </td>
         </tr>
@@ -85,5 +91,5 @@
     </tbody>
   </table>
 <% else %>
-  <p><%= @filters.any? ? "No jobs match your filters." : "No jobs have been posted yet." %></p>
+  <p><%= @filters.any? ? "No jobs match your filters." : @my_jobs ? "You have not posted any jobs yet." : "No jobs have been posted yet." %></p>
 <% end %>
