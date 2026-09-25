@@ -1,21 +1,11 @@
 <h1>Admin · Applications</h1>
 <%= render "admin/navigation" %>
 
-<% if @applications.any? %>
-  <table>
-    <thead><tr><th>Candidate</th><th>Job</th><th>Company</th><th>Status</th><th>Applied</th></tr></thead>
-    <tbody>
-      <% @applications.each do |application| %>
-        <tr>
-          <td><%= link_to application.user.email, admin_user_path(application.user) %></td>
-          <td><%= link_to application.job.title, admin_application_path(application) %></td>
-          <td><%= link_to application.job.company.name, admin_company_path(application.job.company) %></td>
-          <td><%= application.status.humanize %></td>
-          <td><%= application.created_at.to_fs(:long) %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p>No applications yet.</p>
+<%= grid(@applications_grid, show_filters: :always, hide_submit_button: true, hide_reset_button: true) do |g| %>
+  <% g.column(name: "Candidate", attribute: "email", assoc: :user) { |application| link_to(application.user.email, admin_user_path(application.user)) } %>
+  <% g.column(name: "Job", attribute: "title", assoc: :job) { |application| link_to(application.job.title, admin_application_path(application)) } %>
+  <% g.column(name: "Company", attribute: "name", assoc: [ :job, :company ]) { |application| link_to(application.job.company.name, admin_company_path(application.job.company)) } %>
+  <% g.column(name: "Status", attribute: "status", custom_filter: Application::STATUSES.map { |status| [status.humanize, status] }) { |application| application.status.humanize } %>
+  <% g.column(name: "Applied", attribute: "created_at") { |application| application.created_at.to_fs(:long) } %>
 <% end %>
+<div class="admin-grid-actions"><button type="button" class="admin-grid-apply">Apply filters</button><%= link_to "Clear filters", admin_applications_path %></div>

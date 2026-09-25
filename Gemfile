@@ -8,6 +8,9 @@ gem "json", "~> 2.21.2"
 # Authentication and role-based authorization
 gem "devise", "~> 5.0.4"
 gem "cancancan", "~> 3.6.1"
+# Admin table sorting, filtering, and pagination
+gem "wice_grid", path: "vendor/wice_grid-7.1.4"
+gem "pagy", "~> 43.6"
 # OpenSearch client for keyword search and indexing
 gem "opensearch-ruby", "~> 3.4", require: "opensearch"
 # Background job processing through Redis
@@ -60,6 +63,7 @@ group :development, :test do
 end
 
 group :development do
+  gem "faker", "~> 3.8"
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 end

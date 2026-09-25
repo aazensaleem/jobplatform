@@ -90,6 +90,7 @@
       <% end %>
     </tbody>
   </table>
+  <%= render "shared/pagination", pagy: @pagy %>
 <% else %>
   <p><%= @filters.any? ? "No jobs match your filters." : @my_jobs ? "You have not posted any jobs yet." : "No jobs have been posted yet." %></p>
 <% end %>

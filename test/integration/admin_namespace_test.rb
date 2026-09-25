@@ -80,6 +80,55 @@ class AdminNamespaceTest < ActionDispatch::IntegrationTest
     assert_select "p", text: "No users match these filters."
   end
 
+  test "WiceGrid filters admin records and paginates company results" do
+    sign_in users(:admin)
+
+    get admin_users_path, params: { grid: { f: { role: [ "employer" ], employer_approval_status: [ "approved" ] } } }
+    assert_response :success
+    assert_select "script[src*='admin_grid_filters']"
+    assert_select ".wice-grid tbody a[href=?]", admin_user_path(users(:two))
+    assert_select ".wice-grid tbody a[href=?]", admin_user_path(users(:one)), count: 0
+
+    get admin_jobs_path, params: { grid: { f: { company_id: [ companies(:one).id.to_s ], status: [ "active" ], location: "MyString" } } }
+    assert_response :success
+    assert_select ".wice-grid tbody form[action=?]", close_admin_job_path(jobs(:one))
+    assert_select ".wice-grid tbody form[action=?]", close_admin_job_path(jobs(:two)), count: 0
+
+    get admin_jobs_path, params: { grid: { f: { deadline: { fr: { year: "2026", month: "9", day: "23" } } } } }
+    assert_response :success
+    assert_select ".wice-grid tbody form[action=?]", close_admin_job_path(jobs(:one)), count: 0
+
+    get admin_applications_path, params: { grid: { f: { status: [ "pending" ] } } }
+    assert_response :success
+    assert_select ".wice-grid tbody a[href=?]", admin_application_path(applications(:one))
+    assert_select ".wice-grid tbody a[href=?]", admin_application_path(applications(:two)), count: 0
+
+    companies(:one).update!(name: "First grid company")
+    get admin_applications_path, params: { grid: { f: { "companies.name" => "First grid company" } } }
+    assert_response :success
+    assert_select ".wice-grid tbody a[href=?]", admin_application_path(applications(:one))
+    assert_select ".wice-grid tbody a[href=?]", admin_application_path(applications(:two)), count: 0
+
+    21.times { |number| companies(:one).user.companies.create!(name: "Grid company #{number}") }
+    get admin_companies_path
+    assert_response :success
+    assert_select ".wice-grid tbody tr", count: 20
+    assert_select ".wice-grid .pagination a", minimum: 1
+
+    get admin_companies_path, params: { grid: { page: "2" } }
+    assert_response :success
+    assert_select ".wice-grid tbody tr", count: 3
+
+    get admin_companies_path, params: { grid: { order: "name", order_direction: "asc" } }
+    assert_response :success
+    assert_select ".wice-grid tbody tr:first-child a", text: "First grid company"
+
+    get admin_companies_path, params: { grid: { f: { name: "Grid company 20" }, order: "name", order_direction: "asc" } }
+    assert_response :success
+    assert_select ".wice-grid tbody tr", count: 1
+    assert_select ".wice-grid tbody a", text: "Grid company 20"
+  end
+
   test "admin can close and delete jobs from the admin area" do
     sign_in users(:admin)
     job = jobs(:one)

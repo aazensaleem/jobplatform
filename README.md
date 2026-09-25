@@ -18,6 +18,7 @@ roles and save listings.
 - Scheduled job expiry, daily candidate alerts, and weekly statistics
 - Responsive navigation, forms, and tables
 - Admin pages for users, companies, jobs, and applications
+- Paginated public, candidate, and employer lists
 - Employer signup with admin approval or decline before posting
 
 ## Requirements
@@ -78,6 +79,35 @@ its jobs and their applications, while keeping the employer's other companies.
 Removing a user removes all their companies and related records; the signed-in
 admin cannot remove their own account. Other roles get HTTP 403, and visitors
 are sent to sign in.
+
+The four admin lists use WiceGrid. Click a column heading to sort, enter values
+in the filter row, then choose **Apply filters**. **Clear filters** resets the
+grid. Each page shows up to 20 records with page links for more results. The
+users grid filters email, role, approval status, and join date; jobs filters
+title, company, location, status, and deadline; applications filters candidate,
+job, company, status, and application date; companies filters name, employer,
+and creation date. WiceGrid is kept as a local Rails 8.1 compatibility build in
+`vendor/wice_grid-7.1.4` because its published 7.1.4 gem requires Rails 7.
+
+## Pagination and demo data
+
+The Jobs page, My applications, My saved jobs, and the employer job listings
+show 20 records per page with Pagy page links. Jobs page links keep the selected
+filters, keyword search, and the employer-only listings choice. Admin grids
+continue to use WiceGrid pagination.
+
+To load the Phase 21 development demo data and refresh keyword search:
+
+```bash
+bin/rails db:seed
+bin/rails jobs:reindex
+```
+
+The seed is repeatable and leaves existing records in place. It adds 50
+candidate accounts, 10 approved employers, 10 companies, 150 jobs, 200
+applications, and 100 saved jobs. Seed accounts use the reserved
+`example.test` domain and random passwords. `Faker` is used only in development.
+OpenSearch must be running for the reindex command.
 
 ## Notifications
 

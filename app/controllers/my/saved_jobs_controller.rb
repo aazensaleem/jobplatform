@@ -3,7 +3,8 @@ class My::SavedJobsController < ApplicationController
 
   def index
     authorize! :read, :candidate_dashboard
-    @saved_jobs = current_user.saved_jobs.includes(job: :company).order(created_at: :desc)
+    @pagy, @saved_jobs = pagy(:offset, current_user.saved_jobs.includes(job: :company)
+                                     .order(created_at: :desc, id: :desc), limit: 20)
   end
 
   def destroy

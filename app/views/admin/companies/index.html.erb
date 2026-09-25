@@ -1,24 +1,17 @@
 <h1>Admin · Companies</h1>
 <%= render "admin/navigation" %>
 
-<% if @companies.any? %>
-  <table>
-    <thead><tr><th>Company</th><th>Employer</th><th>Location</th><th>Actions</th></tr></thead>
-    <tbody>
-      <% @companies.each do |company| %>
-        <tr>
-          <td><%= link_to company.name, admin_company_path(company) %></td>
-          <td><%= link_to company.user.email, admin_user_path(company.user) %></td>
-          <td><%= company.location.presence || "Not specified" %></td>
-          <td>
-            <%= link_to "View jobs", admin_company_path(company) %>
-            <%= button_to "Delete company", admin_company_path(company), method: :delete,
-                          data: { confirm: "Delete this company and all its jobs and applications?" } %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p>No companies yet.</p>
+<%= grid(@companies_grid, show_filters: :always, hide_submit_button: true, hide_reset_button: true) do |g| %>
+  <% g.column(name: "Company", attribute: "name") { |company| link_to(company.name, admin_company_path(company)) } %>
+  <% g.column(name: "Employer", attribute: "email", assoc: :user) { |company| link_to(company.user.email, admin_user_path(company.user)) } %>
+  <% g.column(name: "Job count", ordering: false) { |company| company.jobs.size } %>
+  <% g.column(name: "Created", attribute: "created_at") { |company| company.created_at.to_fs(:long) } %>
+  <% g.column(name: "Actions") do |company|
+       safe_join([
+         link_to("View jobs", admin_company_path(company)),
+         button_to("Delete company", admin_company_path(company), method: :delete,
+                   data: { confirm: "Delete this company and all its jobs and applications?" })
+       ], " ")
+     end %>
 <% end %>
+<div class="admin-grid-actions"><button type="button" class="admin-grid-apply">Apply filters</button><%= link_to "Clear filters", admin_companies_path %></div>

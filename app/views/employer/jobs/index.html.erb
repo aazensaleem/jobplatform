@@ -36,6 +36,7 @@
         <% end %>
       </tbody>
     </table>
+    <%= render "shared/pagination", pagy: @pagy %>
   <% else %>
     <p>You have not posted any jobs yet.</p>
   <% end %>

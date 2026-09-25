@@ -3,7 +3,9 @@ class Admin::JobsController < Admin::BaseController
 
   def index
     authorize! :read, Job
-    @jobs = Job.includes(company: :user).order(created_at: :desc, id: :desc)
+    @jobs_grid = initialize_grid(Job, include: { company: :user },
+                                 order: "jobs.created_at", order_direction: "desc", per_page: 20,
+                                 custom_order: { "jobs.company_id" => "companies.name" })
   end
 
   def close

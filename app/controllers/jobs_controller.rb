@@ -14,7 +14,7 @@ class JobsController < ApplicationController
       Job.includes(:company).where(id: ids, status: "active").in_order_of(:id, ids)
     else
       Job.includes(:company).where(@filters.except("company_id"))
-         .in_order_of(:status, %w[active draft closed expired]).order(created_at: :desc)
+         .in_order_of(:status, %w[active draft closed expired]).order(created_at: :desc, id: :desc)
     end
     @jobs = @jobs.none if @filters["q"].present? && @filters["status"].present? && @filters["status"] != "active"
     if @filters["company_id"].present?
@@ -26,6 +26,7 @@ class JobsController < ApplicationController
     end
     @jobs = @jobs.where(company_id: current_user.companies.select(:id)) if @my_jobs
     @filter_companies = Company.order(:name)
+    @pagy, @jobs = pagy(:offset, @jobs, limit: 20)
   rescue OpenSearch::Transport::Transport::Error, Faraday::Error => error
     raise unless @filters&.key?("q")
 
@@ -33,6 +34,7 @@ class JobsController < ApplicationController
     @search_unavailable = true
     @jobs = Job.none
     @filter_companies = Company.order(:name)
+    @pagy, @jobs = pagy(:offset, @jobs, limit: 20)
   end
 
   def show

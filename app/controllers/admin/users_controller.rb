@@ -12,6 +12,7 @@ class Admin::UsersController < Admin::BaseController
     @users = @users.where("email LIKE ?", "%#{User.sanitize_sql_like(@email)}%") if @email.present?
     @users = @users.where(role: @role) if @role.present?
     @users = @users.where(role: "employer", employer_approval_status: @approval_status) if @approval_status.present?
+    @users_grid = initialize_grid(@users, order: "users.created_at", order_direction: "desc", per_page: 20)
   end
 
   def show

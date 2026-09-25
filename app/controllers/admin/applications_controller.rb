@@ -1,7 +1,8 @@
 class Admin::ApplicationsController < Admin::BaseController
   def index
     authorize! :read, Application
-    @applications = Application.includes(:user, job: :company).order(created_at: :desc, id: :desc)
+    @applications_grid = initialize_grid(Application, include: [ :user, { job: :company } ],
+                                         order: "applications.created_at", order_direction: "desc", per_page: 20)
   end
 
   def show

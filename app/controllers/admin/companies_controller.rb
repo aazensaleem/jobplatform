@@ -1,7 +1,8 @@
 class Admin::CompaniesController < Admin::BaseController
   def index
     authorize! :read, Company
-    @companies = Company.includes(:user).order(created_at: :desc, id: :desc)
+    @companies_grid = initialize_grid(Company, include: [ :user, :jobs ],
+                                      order: "companies.created_at", order_direction: "desc", per_page: 20)
   end
 
   def show

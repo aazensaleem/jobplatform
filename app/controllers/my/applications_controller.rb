@@ -3,6 +3,7 @@ class My::ApplicationsController < ApplicationController
 
   def index
     authorize! :read, :candidate_dashboard
-    @applications = current_user.applications.includes(job: :company).order(created_at: :desc)
+    @pagy, @applications = pagy(:offset, current_user.applications.includes(job: :company)
+                                       .order(created_at: :desc, id: :desc), limit: 20)
   end
 end

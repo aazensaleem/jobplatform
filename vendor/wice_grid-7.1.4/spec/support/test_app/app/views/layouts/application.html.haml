@@ -1,0 +1,56 @@
+!!! 5
+%html
+  %head
+    %title WiceGrid Examples
+    = stylesheet_link_tag "application", "data-turbo-track": "reload"
+    = javascript_importmap_tags
+    = favicon_link_tag 'favicon.ico'
+    = csrf_meta_tags
+    -# %meta{name: "turbo-prefetch", content: "false"}
+
+  %body
+    .container-fluid
+      %header
+        %h1
+          WiceGrid
+          = Gem.loaded_specs['wice_grid'].version.to_s
+          examples
+        .example-navigator
+          %ul.pagination
+            - previous_example_controller, next_example_controller = previous_next_example_urls
+            - if previous_example_controller
+              %li.previous.page-item
+                =link_to "← Previous", {controller: previous_example_controller, action: :index}, class: 'page-link'
+            -if next_example_controller
+              %li.next.page-item
+                =link_to "Next →", {controller: next_example_controller, action: :index}, class: 'page-link'
+        .clear
+      .row
+        .col-md-3
+          .card.bg-light
+            .card-body
+              %ul.nav-pills
+                - @example_map.each do |title, examples|
+                  %li.navbar= title
+                  - examples.each do |example_controller, name, _|
+                    - if example_controller.to_s == controller_name
+                      - active_klass = ' active'
+
+                      - @example_name = name
+                    - else
+                      - active_klass = nil
+                    %li{class: "nav-link#{active_klass}"}
+                      = link_to name, controller: example_controller, action: :index
+        .col-md-9
+          =yield
+      %hr
+
+      %footer
+        &copy; Yury Leikind 2012 - 2015
+        %span.sources
+          %a{href: "https://github.com/leikind/wice_grid"} Sources
+
+%a{href: "https://github.com/leikind/wice_grid", target: "_blank"}
+  = image_tag 'forkme_right_gray.png',
+      style: "position: absolute; top: 0; right: 0; border: 0;;",
+      alt: "Fork me on GitHub"

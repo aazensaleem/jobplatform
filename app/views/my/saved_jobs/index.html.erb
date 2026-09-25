@@ -15,6 +15,7 @@
       <% end %>
     </tbody>
   </table>
+  <%= render "shared/pagination", pagy: @pagy %>
 <% else %>
   <p>You have not saved any jobs yet.</p>
 <% end %>

@@ -1,27 +1,36 @@
 <h1>Admin · Jobs</h1>
 <%= render "admin/navigation" %>
+<div class="admin-grid-actions admin-jobs-controls">
+  <span class="form-hint">Filter the columns below, then apply.</span>
+  <button type="button" class="admin-grid-apply">Apply filters</button>
+  <%= link_to "Clear filters", admin_jobs_path %>
+</div>
 
-<% if @jobs.any? %>
-  <table>
-    <thead><tr><th>Title</th><th>Company</th><th>Employer</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody>
-      <% @jobs.each do |job| %>
-        <tr>
-          <td><%= link_to job.title, job_path(job) %></td>
-          <td><%= link_to job.company.name, admin_company_path(job.company) %></td>
-          <td><%= link_to job.company.user.email, admin_user_path(job.company.user) %></td>
-          <td><%= job.status.humanize %></td>
-          <td>
-            <% unless job.status == "closed" %>
-              <%= button_to "Close job", close_admin_job_path(job), method: :patch %>
-            <% end %>
-            <%= button_to "Delete job", admin_job_path(job), method: :delete,
-                          data: { confirm: "Delete this job and its applications?" } %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p>No jobs yet.</p>
+<%= grid(@jobs_grid, html: { class: "admin-jobs-grid" }, show_filters: :always,
+                     hide_submit_button: true, hide_reset_button: true) do |g| %>
+  <% g.column(name: "Title", attribute: "title") { |job| link_to(job.title, job_path(job)) } %>
+  <% g.column(name: "Company", attribute: "company_id",
+              custom_filter: Company.order(:name).pluck(:name, :id)) { |job| link_to(job.company.name, admin_company_path(job.company)) } %>
+  <% g.column(name: "Location", attribute: "location") { |job| job.location.presence || "—" } %>
+  <% g.column(name: "Status", attribute: "status", custom_filter: Job::STATUSES.map { |status| [status.humanize, status] }) do |job|
+       tag.span(job.status.humanize, class: "admin-job-status admin-job-status-#{job.status}")
+     end %>
+  <% g.column(name: "Deadline", attribute: "deadline") do |job|
+       if job.deadline
+         tag.time(datetime: job.deadline.iso8601) do
+           safe_join([tag.span(job.deadline.strftime("%d %b %Y")),
+                      tag.small(job.deadline.strftime("%H:%M PKT"))])
+         end
+       else
+         tag.span("No deadline", class: "form-hint")
+       end
+     end %>
+  <% g.column(name: "Created", attribute: "created_at", filter: false) { |job| job.created_at.strftime("%d %b %Y") } %>
+  <% g.column(name: "Actions") do |job|
+       actions = []
+       actions << button_to("Close job", close_admin_job_path(job), method: :patch) unless job.status == "closed"
+       actions << button_to("Delete job", admin_job_path(job), method: :delete,
+                            data: { confirm: "Delete this job and its applications?" })
+       tag.div(safe_join(actions), class: "admin-job-actions")
+     end %>
 <% end %>
