@@ -51,7 +51,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'sprockets-rails'
   s.add_development_dependency 'stimulus-rails'
-  s.add_development_dependency 'sqlite3', '~> 1.4'
+  s.add_development_dependency 'sqlite3', '~> 2.9'
   s.add_development_dependency 'therubyracer'
   s.add_development_dependency 'turbo-rails'
   s.add_development_dependency 'yard'
